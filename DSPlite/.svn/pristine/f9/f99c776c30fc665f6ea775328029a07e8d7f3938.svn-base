@@ -1,0 +1,65 @@
+/*
+ * File Name: SoapMessageFilterTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-28
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-28
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import static org.junit.Assert.*;
+
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.cetiti.dsp.filter.soapclient.Mapper;
+import com.cetiti.dsp.filter.soapclient.MapperService;
+import com.sun.org.apache.regexp.internal.recompile;
+import com.sun.xml.internal.ws.api.message.Headers;
+import com.sun.xml.internal.ws.developer.WSBindingProvider;
+import com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-28
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class SoapMessageFilterTest {
+
+	//wsimport -s E:\MyEclipse\workSpace\DSPlite\test -p com.cetiti.dsp.filter.soapclient -keep http://10.70.7.72:8081/com.cetiti.dsp/Mapper?wsdl
+	private Mapper mapper;
+	
+	@Before
+	public void setUp() throws Exception {
+		mapper = new MapperService().getMapperPort();
+	}
+	
+	private String sign(Map<String, String> paramMap){
+		return RestMessageFilterTest.setSignature(paramMap).get("sign");
+	}
+	@Test
+	public void test() {
+		//HttpTransportPipe.dump = true;
+		WSBindingProvider bp = (WSBindingProvider)mapper;
+		bp.setOutboundHeaders(Headers.create(new QName("appKey"), RestMessageFilterTest.appKey),
+				Headers.create(new QName("timestamp"), String.valueOf(System.currentTimeMillis())),
+				Headers.create(new QName("sign"), sign(null)) );
+		
+		String retn = mapper.selectStrategys();
+		System.out.println(retn);
+	}
+
+}

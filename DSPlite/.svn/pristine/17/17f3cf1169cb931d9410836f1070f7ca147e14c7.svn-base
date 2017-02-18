@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>statistic</title>
+    <meta charset="utf-8">
+	<meta http-equiv="keywords" content="dsp,statistic,service">
+	<meta http-equiv="description" content="dsp main page">
+	<meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	
+	
+    <link rel="stylesheet" type="text/css" href="resources/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/dataTables.bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/dsp.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/jquery-ui.css" />
+	
+	<script type="text/javascript" src="js/jquery-1.12.3.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.js"></script>
+	<script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>	
+	<script type="text/javascript" src="js/jquery.flot.js"></script>
+	<script type="text/javascript" src="js/jquery.flot.time.js"></script>
+	<script type="text/javascript" src="js/jquery-ui.js"></script>
+	<script type="text/javascript" src="js/include.js"></script>
+  </head>
+  
+  <body>
+  	<include src="include/header.html"></include>
+
+	<div id="content" class="container-fluid">
+		<div class="plot-header">
+			<p><strong>服务统计：</strong>接口在指定时间段内每分钟被调用的次数统计，默认统计最近一小时内被调用次数最多的接口（前10）</p>
+			<div class="panel panel-default">
+				<div class="panel-body">	
+					<form id="apiStatForm">
+						<div class="col-md-4 rf-no-padding">
+							<span>起始时间</span>
+							<input type="text" name="begin" class="date-picker">
+						</div>
+						<div class="col-md-4 rf-no-padding">
+							<span>结束时间</span>
+							<input type="text" name="end" class="date-picker">
+						</div>
+						<div class="col-md-4 rf-no-padding">
+							<span>接口</span>
+							<input type="text" name="api">
+							<input type="Button" name="submit"  value="统计">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="plot-container">
+			<div id="apiStatistic" class="plot-placeholder"></div>
+		</div>
+		
+		<div class="plot-header">
+			<p><strong>用户统计：</strong>用户在指定时间段内每分钟调用接口的次数统计，默认统计最近一小时内调用接口次数最多的用户（前10）</p>
+			<div class="panel panel-default">
+				<div class="panel-body">	
+					<form id="keyStatForm">
+						<div class="col-md-4 rf-no-padding">
+							<span>起始时间</span>
+							<input type="text" name="begin" class="date-picker">
+						</div>
+						<div class="col-md-4 rf-no-padding">
+							<span>结束时间</span>
+							<input type="text" name="end" class="date-picker">
+						</div>
+						<div class="col-md-4 rf-no-padding">
+							<span>用户</span>
+							<input type="text" name="key">
+							<input type="Button" name="submit"  value="统计">
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="plot-container">
+			<div id="keyStatistic" class="plot-placeholder"></div>
+		</div>
+			
+	</div>
+
+	<include src="include/footer.html"></include>
+	
+    <script type="text/javascript">
+    	$(function() {
+    		$("#navItem li[name='stat']").addClass('active'); 
+    		statistic.start();
+			setInterval(statistic.start, 7000);
+			$(".date-picker").datepicker();
+			statistic.autoComplete();
+			$("#apiStatForm input[name='submit']").click(function(){
+    			statistic.statByApi();
+    		});
+			$("#keyStatForm input[name='submit']").click(function(){
+    			statistic.statByKey();
+    		});
+		});
+		
+		var statistic={
+			start:function(){
+				statistic.statByApi();
+				statistic.statByKey();
+			},
+			statByApi:function(){
+				var begin = $("#apiStatForm input[name='begin']").val();
+	    		var end = $("#apiStatForm input[name='end']").val();
+	    		var api = $("#apiStatForm input[name='api']").val();
+	    		
+				$.ajax({
+	    			type:"post",
+	    			url:"statistic/statisticByApi",
+	    			dataType:"json",
+	    			data:{begin:begin,end:end,api:api},
+	    			success:function(data){
+	    				var v = [];
+	    				for(var e in data){
+	    					var a = data[e];
+	    					var p = {data:[], label:'', points:{show:true}};
+	    					p.data = data[e];
+	    					p.label = e;
+	    					v.push(p);
+	    					//$.plot("#apiStatistic", [{data:a, points:{show:true}}]);
+	    				}
+	    				$.plot("#apiStatistic", v, {xaxes: [ { mode: "time",  timezone: "browser"} ]});
+	    			}	
+	    		});
+			},
+			statByKey:function(obj){
+				var begin = $("#keyStatForm input[name='begin']").val();
+	    		var end = $("#keyStatForm input[name='end']").val();
+	    		var key = $("#keyStatForm input[name='key']").val();
+	    		if(key){
+	    			var app = statistic.appData;
+		    		for(var i=0; i<app.length; i++){
+		    			if(key===app[i].appName){
+		    				key = app[i].appKey;
+		    				break;
+		    			}
+		    		}
+	    		}
+	    		
+				$.ajax({
+	    			type:"post",
+	    			url:"statistic/statisticByKey",
+	    			dataType:"json",
+	    			data:{begin:begin,end:end,key:key},
+	    			success:function(data){
+	    				var v = [];
+	    				for(var e in data){
+	    					var a = data[e];
+	    					var p = {data:[], label:'', points:{show:true}};
+	    					p.data = data[e];
+	    					p.label = e;
+	    					v.push(p);
+	    				}
+	    				$.plot("#keyStatistic", v, {xaxes: [ { mode: "time",  timezone: "browser"} ]});
+	    			}	
+	    		});
+			},
+			autoComplete:function(){
+				$.ajax({
+	    			type:"get",
+	    			url:"quantity/methods",
+	    			dataType:"json",
+	    			async: true,
+	    			success:function(data){
+		    			$("#apiStatForm input[name='api']").autocomplete({
+							  source: data,
+							  minLength:0
+						}).focus(function() {
+						    $("#apiStatForm input[name='api']").autocomplete("search", $(this).val());
+						});
+	    			}
+	    		});
+				$.ajax({
+	    			type:"get",
+	    			url:"app/query",
+	    			dataType:"json",
+	    			async: true,
+	    			success:function(data){
+	    				var names = [];
+	    				data = data.data;
+	    				statistic.appData = data;
+	    				for(var i=0; i<data.length; i++){
+	    					names.push(data[i].appName);
+	    				}
+		    			$("#keyStatForm input[name='key']").autocomplete({
+							  source: names,
+							  minLength:0
+						}).focus(function() {
+						    $("#keyStatForm input[name='key']").autocomplete("search", $(this).val());
+						});
+	    			}
+	    		});
+	    	},
+	    	appData:[]
+		}
+		
+    </script>
+  </body>
+</html>

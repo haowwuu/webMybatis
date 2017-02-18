@@ -1,0 +1,38 @@
+@CHARSET "UTF-8";
+#serviceContentTable
+{
+    table-layout:fixed;
+    word-wrap:break-word;
+}
+#serviceContentTable th{
+	text-align:center;
+}
+.dataTables_length{
+	margin-top:10px;
+}
+.opt-show{
+	display:none;
+}
+.opt-td{
+	display:block;
+}
+/* #applicationTable td:last-child{
+	max-width:30px;
+	overflow: hidden;
+} */
+table td:hover .opt-td{
+	display:none;
+}
+table td:hover .opt-show{
+	display:block;
+}
+.rf-no-padding{
+	padding-right:0;
+	padding-left:0;
+}
+.rf-no-margin{
+	margin-right:0;
+	margin-right:0
+}
+
+

@@ -1,0 +1,72 @@
+/*
+ * File Name: AppServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.cetiti.dsp.dao.AliaseMapper;
+import com.cetiti.dsp.dao.QuantityMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.KeyValue;
+import com.cetiti.dsp.service.AliaseService;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+//具体的数据库增改查删操作
+ */
+
+public class AliaseServiceImpl implements AliaseService{
+
+    AliaseMapper aliaseMapper = DataSourceFactory.getMapper(AliaseMapper.class);
+    private static Map<String, String> aliasRepos = new ConcurrentHashMap<String, String>();
+
+	public AliaseServiceImpl()
+    {
+        for(KeyValue<String, String> kv:aliaseMapper.selectList()){
+            aliasRepos.put(kv.getKey(), kv.getValue());
+        }
+    }
+	
+	@Override
+    public String getAlias(String serviceName){
+        return aliasRepos.get(serviceName);
+    }
+
+    @Override
+	public List<KeyValue<String, String>> queryAll() {
+		return aliaseMapper.selectList();
+	}
+
+	@Override
+	public void add(KeyValue<String, String> aliaseInfo) {
+		if(null==aliaseInfo||null==aliaseInfo.getKey()){
+			return;
+		}
+		aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+		aliaseMapper.insert(aliaseInfo);
+	}
+
+	@Override
+	public void update(KeyValue<String, String> aliaseInfo) {
+	    //若值为空，（关键的接口名称作为标识，不可为空）跳过
+        if(null==aliaseInfo||null==aliaseInfo.getKey()){
+            return;
+        }
+        aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+        aliaseMapper.update(aliaseInfo); 
+	}
+}

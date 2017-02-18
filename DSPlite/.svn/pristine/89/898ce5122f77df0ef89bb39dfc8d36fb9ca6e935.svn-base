@@ -1,0 +1,89 @@
+package com.cetiti.dsp.filter;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.filter.Authority;
+import com.cetiti.dsp.filter.User;
+import com.cetiti.dsp.servlet.APIServlet;
+
+public class TrafficStatFilter extends HttpFilter {
+
+    String interfaceAccessLimit;
+    int count = 0;
+    public static Map<String, String> map = new HashMap<String, String>();
+
+    public void destroy() {
+    }
+
+    @Override
+    public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
+            String servletPath = request.getRequestURI();
+            System.out.println(servletPath);
+            System.out.println("(----------------------------------------------------------------------------------------------------------");
+            String trueServletPath = request.getServletPath();
+            System.out.println(trueServletPath);
+            System.out.println("----------------------------------------------------------------------------------------------------------)");
+        // - 在用户已经登录(可使用 用户是否登录 的过滤器)的情况下, 获取用户信息. session.getAttribute("user")
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        // - 再获取用户所具有的权限的信息: List<Authority>
+        List<Authority> authorities = user.getAuthorities();
+        
+        System.out.println(authorities.toString());
+
+        // - 检验用户是否有请求 servletPath 的权限: 可以思考除了遍历以外, 有没有更好的实现方式
+        Authority authority = new Authority(null, servletPath);
+        // - 若有权限则: 响应
+        if (authorities.contains(authority)) {
+
+                if (servletPath.indexOf(APIServlet.API_PATH) > 0) {
+                    map.put(servletPath, Integer.toString(count));
+                    count++;
+                }
+       
+            System.out.println(map.toString());
+
+            if ((map.get(servletPath) != null)
+                    && (Integer.parseInt(map.get(servletPath)) > Integer.parseInt(interfaceAccessLimit))) {
+                request.getRequestDispatcher("/error.jsp").forward(request, response);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+    
+        }else{
+            response.sendRedirect(request.getContextPath() + "/403.jsp");
+            return;
+        }
+    }
+
+    public void init(FilterConfig filterConfig) throws ServletException {
+        System.out.println("TrafficStatFilter.init");
+        interfaceAccessLimit = filterConfig.getInitParameter("InterfaceAccessLimit");
+
+      
+    }
+}

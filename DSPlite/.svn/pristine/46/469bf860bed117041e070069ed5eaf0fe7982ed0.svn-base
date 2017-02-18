@@ -1,0 +1,63 @@
+package com.cetiti.dsp.filter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+
+public class UserDao {
+
+	private static Map<String, User> users;
+	
+	private static List<Authority> authorities = null;
+	
+	static{
+		
+		authorities = new ArrayList<>();
+        authorities.add(new Authority("selectErrorCodeWithDsql", "/DSPlite/api/com.cetiti.dsp.Mapper/selectErrorCodeWithDsql"));
+        authorities.add(new Authority("selectLevelsWithParams", "/DSPlite/api/com.cetiti.dsp.Mapper/selectLevelsWithParams"));
+        authorities.add(new Authority("selectStrategys", "/DSPlite/api/com.cetiti.dsp.Mapper/selectStrategys"));
+        authorities.add(new Authority("selectTableWithDsql", "/DSPlite/api/com.cetiti.dsp.Mapper/selectTableWithDsql"));
+		
+		users = new HashMap<String, User>();
+		
+		User user1 = new User("Adam", authorities.subList(0, 2));
+		users.put("Adam", user1);
+		
+		user1 = new User("Eva", authorities.subList(2, 4));
+		users.put("Eva", user1);
+		
+	}
+	
+	
+	
+	User get(String username){
+		return users.get(username); 
+	}
+	
+	void update(String username, List<Authority> authorities){
+		users.get(username).setAuthorities(authorities);
+	}
+	
+	public List<Authority> getAuthorities() {
+		return authorities;
+	}
+
+	public List<Authority> getAuthorities(String[] urls) {
+		List<Authority> authorities2 = new ArrayList<>();
+		
+		for(Authority authority: authorities){
+			if(urls != null){
+				for(String url: urls){
+					if(url.equals(authority.getUrl())){
+						authorities2.add(authority);
+					}
+				}
+			}			
+		}
+		
+		return authorities2;
+	}
+}

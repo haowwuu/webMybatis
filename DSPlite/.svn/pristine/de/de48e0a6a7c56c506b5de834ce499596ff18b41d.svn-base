@@ -1,0 +1,101 @@
+/*
+ * File Name: RestMessageFilter.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-25
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-25
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.model.AuditTrail;
+import com.cetiti.dsp.service.AuditTrailService;
+import com.cetiti.dsp.service.SecurityQuantityService;
+import com.cetiti.dsp.service.impl.AuditTrailServiceImpl;
+import com.cetiti.dsp.service.impl.SecurityQuantityServiceImpl;
+import com.cetiti.dsp.servlet.APIServlet;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.Configration;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-25
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class RestMessageFilter implements Filter{
+	
+    private SecurityQuantityService sqService = new SecurityQuantityServiceImpl();
+    private AuditTrailService atService = new AuditTrailServiceImpl();
+    
+	@Override
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+			FilterChain filterChain) throws IOException, ServletException {
+		HttpServletRequest request = (HttpServletRequest)servletRequest;
+		String uri = request.getRequestURI();
+		if(uri.indexOf(APIServlet.API_PATH)>0){
+			String method = uri.substring(uri.indexOf(APIServlet.API_PATH)+APIServlet.API_PATH_LENGTH);
+			Map<String, String> paramMap = APIServlet.getRequestParameterMap(request);
+			
+			if(Configration.isSecurityControlEnabled()){
+    			ApiResult securityResult = sqService.securityCheck(paramMap);
+    			if(!securityResult.isOk()){
+    				HttpServletResponse response = (HttpServletResponse)servletResponse;
+    				securityResult.writeToResponse(response);
+    				return;
+    			}
+    		}
+			
+			String appKey = paramMap.get(SecurityQuantityService.APP_KEY);
+			if(Configration.isQuantityControlEnabled()){
+    			ApiResult quantityResult = sqService.quantityCheck(appKey, method);
+    			if(!quantityResult.isOk()){
+    				HttpServletResponse response = (HttpServletResponse)servletResponse;
+    				quantityResult.writeToResponse(response);
+    				return;
+    			}
+    		}
+			
+			AuditTrail audit = new AuditTrail();
+			audit.setApiMethod(method);
+    		audit.setApiType(SecurityQuantityService.TYPE_REST);
+    		audit.setAppKey(appKey);
+    		audit.setAuditDate(new Date());
+    		audit.setParameters(paramMap.toString());
+    		atService.trail(audit);
+		}
+		
+		filterChain.doFilter(servletRequest, servletResponse);
+	}
+	
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+
+	}
+	
+	@Override
+	public void destroy() {
+		
+	}
+
+}

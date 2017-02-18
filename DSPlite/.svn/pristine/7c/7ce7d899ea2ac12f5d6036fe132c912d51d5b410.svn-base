@@ -1,0 +1,111 @@
+/*
+ * File Name: AppServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.List;
+
+import com.cetiti.dsp.dao.AppMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.APPinfo;
+import com.cetiti.dsp.service.AppService;
+import com.cetiti.dsp.util.EncryptUtil;
+import com.cetiti.dsp.util.SequenceGenerator;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-31
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AppServiceImpl implements AppService{
+
+	AppMapper appMapper = DataSourceFactory.getMapper(AppMapper.class);
+	
+	@Override
+	public List<APPinfo> queryAll() {
+		return appMapper.selectList();
+	}
+
+	@Override
+	public void add(APPinfo app) {
+		if(null==app||null==app.getAppAddress()){
+			return;
+		}
+		String url = formatUrl(app.getAppAddress());
+		if(null==appMapper.selectByAddress(url)){
+			app.setAppAddress(url);
+			app.setAppKey(createKey(url));
+			app.setAppSecret(createSecret(url));
+			app.setAppId(SequenceGenerator.next());
+			appMapper.insert(app);
+		}
+	}
+
+	@Override
+	public void update(APPinfo app) {
+		if(null==app){
+			return;
+		}
+		String url = app.getAppAddress();
+		if(null!=url&&url.length()>0){
+			url = formatUrl(url);
+			app.setAppAddress(url);
+		}
+		appMapper.update(app);
+	}
+
+	@Override
+	public void delete(String appid) {
+		if(null==appid){
+			return;
+		}
+		appMapper.delete(appid);
+	}
+	
+	public static String createKey(String url){
+		return EncryptUtil.md5("appkey"+url+System.nanoTime());
+	}
+	
+	public static String createSecret(String url){
+		return EncryptUtil.md5("appSecret"+url+System.nanoTime());
+	}
+
+	public static String formatUrl(String url) {
+		int pidx = url.indexOf("://");
+		if (pidx < 0) {
+			url = "http://" + url;
+			pidx = url.indexOf("://");
+		}
+
+		int slash1 = url.indexOf('/', pidx + 3);
+		if (slash1 < 0) {
+			url += '/';
+			slash1 = url.indexOf('/', pidx + 3);
+		}
+		int len = url.length();
+		if (slash1 + 1 < len) {
+			int slash2 = url.indexOf('/', slash1 + 1);
+			if (slash2 < 0) {
+				url += '/';
+			} else {
+				url = url.substring(0, slash2 + 1);
+			}
+		}
+
+		return url;
+	}
+
+}

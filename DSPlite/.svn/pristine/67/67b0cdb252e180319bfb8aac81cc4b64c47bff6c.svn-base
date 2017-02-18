@@ -1,0 +1,56 @@
+
+if (typeof jQuery === 'undefined') {
+  throw new Error('Bootstrap\'s JavaScript requires jQuery')
+}
+
+var dsp={
+	login:function(){
+		var name = $("#loginForm input[name='name']").val();
+		var password = $("#loginForm input[name='password']").val();
+		$.ajax({
+			type:"post",
+			url:"app/login",
+			dataType:"json",
+			data:{name:name, password:password},
+			success:function(data){
+				if(data.resultcode==1){
+					$("#loginForm p").html(data.message);
+					$("#dspLogin").show();
+					$("#dspUser").hide();
+				}else{
+					$("#loginForm p").html("");
+					$("#userAccount").html("您好，"+name);
+					$("#dspLogin").hide();
+					$("#dspUser").show();
+				}
+			}
+		})
+	}, 
+	logout:function(){
+		$.post("app/logout");
+		$("#dspLogin").show();
+		$("#dspUser").hide();
+	}
+}
+
+/*+function(window){
+	var dspinit = function(){};
+	dspinit.prototype = {
+		load:function(){
+			console.log("fadf");
+		}
+	}
+	window.onload = function(){
+		new dspinit().load();
+	}
+}(window)*/
+
+
+/*+function($){
+	
+	$("#navItem button]").click(function(){
+		console.log('click in');
+	})
+	console.log('login button binded');
+	
+}(jQuery)*/

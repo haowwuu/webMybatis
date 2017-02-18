@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+       Copyright 2009-2012 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE configuration
+    PUBLIC "-//localhost//DTD Config 1.0//EN"
+    "http://localhost/dtd/config.dtd">
+
+<configuration>
+
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC">
+        <property name="" value="" />
+      </transactionManager>
+      <dataSource type="UNPOOLED">
+       <!--  <property name="driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
+        <property name="url" value="jdbc:derby:ibderby;create=true" /> -->
+        <property name="driver" value="com.mysql.jdbc.Driver" />
+        <property name="url"  value="jdbc:mysql://10.70.7.72:3306/dspfce?useUnicode=true&amp;characterset=utf-8" />
+        <property name="username" value="root" />
+        <property name="password" value="20140401" />
+      </dataSource>
+    </environment>
+  </environments>
+
+ <!--  <mappers>
+    <mapper resource="DspMapper.xml" />
+  </mappers> -->
+
+</configuration>

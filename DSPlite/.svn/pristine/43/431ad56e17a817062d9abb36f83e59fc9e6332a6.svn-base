@@ -1,0 +1,153 @@
+/*
+ * File Name: SoapMessageFilter.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-20
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-20
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.ws.handler.MessageContext;
+import javax.xml.ws.handler.soap.SOAPHandler;
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetiti.dsp.model.AuditTrail;
+import com.cetiti.dsp.service.AuditTrailService;
+import com.cetiti.dsp.service.SecurityQuantityService;
+import com.cetiti.dsp.service.impl.AuditTrailServiceImpl;
+import com.cetiti.dsp.service.impl.SecurityQuantityServiceImpl;
+import com.cetiti.dsp.servlet.InitListener;
+import com.cetiti.dsp.soap.CodeGenerator;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-20
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class SoapMessageFilter implements SOAPHandler<SOAPMessageContext> {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(SoapMessageFilter.class);
+    private boolean quantityControlEnabled = InitListener.isQuantityControlEnabled();
+    private boolean securityControlEnabled = InitListener.isSecurityControlEnabled();
+    private AuditTrail audit = new AuditTrail();
+    private SecurityQuantityService sqService = new SecurityQuantityServiceImpl();
+    private AuditTrailService atService = new AuditTrailServiceImpl();
+    
+	@Override
+    public Set<QName> getHeaders() {
+        return null;
+    }
+    
+	@Override
+    public boolean handleMessage(SOAPMessageContext smc){
+    	Boolean outboundProperty = (Boolean)smc.get (MessageContext.MESSAGE_OUTBOUND_PROPERTY);
+    	if(!outboundProperty){  //handle input message
+    		try {
+    			Map<String, String> paramMap = new HashMap<String, String>();
+        		SOAPHeader header = smc.getMessage().getSOAPHeader();
+        		if(null!=header){
+        			Iterator<?> it = header.examineAllHeaderElements();
+            		while(it.hasNext()){
+            			SOAPHeaderElement element = (SOAPHeaderElement)it.next();
+            			paramMap.put(element.getTagName(), element.getTextContent());
+            		}
+        		}
+            		
+        		SOAPBody body = smc.getMessage().getSOAPBody();
+        		Iterator<?> itb = body.getChildElements();
+        		String localName=null, prefix=null, uri=null, apiName=null;
+        		
+        		while(itb.hasNext()){
+        			SOAPElement se = (SOAPElement)itb.next();
+        			localName = se.getElementName().getLocalName();
+        			prefix = se.getElementName().getPrefix();
+        			uri = se.getElementName().getURI();
+        			apiName = SqlSessionFactoryRepos.generateApiName(localName, 
+        					CodeGenerator.namespaceToPackage(uri));
+
+        			Iterator<?> itArg  = se.getChildElements();
+        			while(itArg.hasNext()){
+        				Object ae = itArg.next();
+        				if(ae instanceof SOAPElement){
+        					SOAPElement seArg = (SOAPElement)ae;
+        					paramMap.put(seArg.getTagName(), seArg.getTextContent());
+        				}
+        			}	
+        		}
+        		
+        		if(securityControlEnabled){
+        			ApiResult securityResult = sqService.securityCheck(paramMap);
+        			if(!securityResult.isOk()){
+        				body.removeContents();
+                		SOAPElement se = body.addChildElement(localName+"Response", prefix, uri);
+                		se = se.addChildElement(new QName("return"));
+                		se.addTextNode(securityResult.getMsg().toString());
+                		return false;
+        			}
+        		}
+        		
+        		String appKey = paramMap.get(SecurityQuantityService.APP_KEY);
+        		if(quantityControlEnabled){
+        			ApiResult quantityResult = sqService.quantityCheck(appKey, apiName);
+        			if(!quantityResult.isOk()){
+        				body.removeContents();
+                		SOAPElement se = body.addChildElement(localName+"Response", prefix, uri);
+                		se = se.addChildElement(new QName("return"));
+                		se.addTextNode(quantityResult.getMsg().toString());
+                		return false;
+        			}
+        		}
+        		
+        		audit.setApiMethod(apiName);
+        		audit.setApiType(SecurityQuantityService.TYPE_SOAP);
+        		audit.setAppKey(appKey);
+        		audit.setAuditDate(new Date());
+        		audit.setParameters(paramMap.toString());
+    		} catch (Exception e) {
+    			//e.printStackTrace();
+    			LOGGER.error(e.getMessage());
+    		}
+    	}else {
+			atService.trail(audit);
+		}
+
+        return true;
+    }
+    
+    @Override
+    public boolean handleFault(SOAPMessageContext smc) {
+        return true;
+    }
+    
+   
+    @Override
+    public void close(MessageContext messageContext) {
+    	 // nothing to clean up
+    }
+    
+}

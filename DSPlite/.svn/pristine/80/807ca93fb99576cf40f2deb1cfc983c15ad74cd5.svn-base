@@ -1,0 +1,106 @@
+/*
+ * File Name: QuantityServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-11-2
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-11-2
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.cetiti.dsp.dao.QuantityMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.model.QuantityInfo;
+import com.cetiti.dsp.service.AliaseService;
+import com.cetiti.dsp.service.QuantityService;
+import com.cetiti.dsp.util.SequenceGenerator;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-11-2
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class QuantityServiceImpl implements QuantityService{
+
+	private QuantityMapper quantityMapper = DataSourceFactory.getMapper(QuantityMapper.class);
+	private AliaseService aliaseService = new AliaseServiceImpl();
+	
+	@Override
+	public List<QuantityInfo> queryAll() {
+		return quantityMapper.selectList();
+	}
+
+	@Override
+	public void add(QuantityInfo quantity) {
+		if(null==quantity||null==quantity.getAppKey()||null==quantity.getApiMethod()){
+			return;
+		}
+		QuantityInfo info = quantityMapper.selectByKeyAndMethod(quantity.getAppKey(), quantity.getApiMethod());
+		if(null!=info){
+			info.setTotal(quantity.getTotal());
+			quantityMapper.update(info);
+			return;
+		}
+		quantity.setQuantityId(SequenceGenerator.next());
+		quantityMapper.insert(quantity);
+	}
+
+	@Override
+	public void update(QuantityInfo quantity) {
+		if(null==quantity||null==quantity.getAppKey()||null==quantity.getApiMethod()){
+			return;
+		}
+		quantityMapper.update(quantity);
+	}
+
+	@Override
+	public void delete(String quantityId) {
+		if(null==quantityId){
+			return;
+		}
+		quantityMapper.delete(quantityId);
+	}
+	
+	@Override
+	public List<Map<String, Object>> queryQuantityAndServiceByAppName(String appName){
+		if(null==appName){
+			return null;
+		}
+		List<QuantityInfo> quantitys = quantityMapper.selectListByApp(appName);
+		if(null==quantitys||quantitys.size()<1){
+			return null;
+		}
+		List<Map<String, Object>> retn = new ArrayList<Map<String,Object>>();
+		for(QuantityInfo quantity:quantitys){
+			APIinfo api = SqlSessionFactoryRepos.getApiInfoClone(quantity.getApiMethod());
+			if(null!=api){
+				if(null!=aliaseService.getAlias(api.getNameSpace())){
+	                api.setNameSpace(aliaseService.getAlias(api.getNameSpace()));
+	            }
+	            if(null!=aliaseService.getAlias(api.getApiName())){
+	                api.setSelectId(aliaseService.getAlias(api.getApiName()));
+	            }
+	            Map<String, Object> map = api.toMap();
+	            map.putAll(quantity.toMap());
+	            retn.add(map);
+			}
+		}
+		
+		return retn;
+	}
+
+}

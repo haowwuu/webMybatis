@@ -1,0 +1,93 @@
+/*
+ * File Name: CodeGeneratorTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-13
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-13
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetit.dsp.soap;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.soap.ServicePublisher;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-13
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class CodeGeneratorTest {
+
+	/**
+	 * 〈一句话功能简述〉
+	 * 
+	 * @throws java.lang.Exception
+	 */
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@Test
+	public void test() {
+		test1();
+		test1();
+	}
+	
+	private void test1(){
+		Collection<APIinfo> infoset = new HashSet<APIinfo>();
+		APIinfo info = new APIinfo();
+		info.setApiName("com.cet.dsp.UserMapper/selectUser");
+		info.setNameSpace("com.cet.dsp.UserMapper");
+		info.setFullQualifiedName("com.cet.dsp.UserMapper.selectUser");
+		info.setSelectId("selectUser");
+		List<String> paramList = new ArrayList<String>();
+		paramList.add("userName");
+		paramList.add("userId");
+		info.setParameters(paramList);
+		infoset.add(info);
+		
+		APIinfo info1 = new APIinfo();
+		info1.setApiName("com.cet.dsp.UserMapper/selectUserByIdCard");
+		info1.setNameSpace("com.cet.dsp.UserMapper");
+		info1.setFullQualifiedName("com.cet.dsp.UserMapper.selectUserByIdCard");
+		info1.setSelectId("selectUserByIdCard");
+		paramList = new ArrayList<String>();
+		paramList.add("idCard");
+		info1.setParameters(paramList);
+		infoset.add(info1);
+		
+		APIinfo info2 = new APIinfo();
+		info2.setApiName("com.cet.dsp.RoleMapper/selectRole");
+		info2.setNameSpace("com.cet.dsp.RoleMapper");
+		info2.setFullQualifiedName("com.cet.dsp.RoleMapper.selectRole");
+		info2.setSelectId("selectRole");
+		paramList = new ArrayList<String>();
+		
+		paramList.add("roelName");
+		paramList.add("roleId");
+		info2.setParameters(paramList);
+		
+		infoset.add(info2);
+		
+		ServicePublisher.publish(infoset);
+	}
+
+}

@@ -1,0 +1,160 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>service contents</title>
+	<!-- <meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">     -->
+	<meta http-equiv="keywords" content="dsp,contents,service">
+	<meta http-equiv="description" content="dsp main page">
+	<meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	
+	
+    <link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dataTables.bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dsp.css" />
+	
+	<%-- <script type="text/javascript" src="<%=basePath%>js/jquery-1.11.1.min.js"></script> --%>
+	<script type="text/javascript" src="<%=basePath%>js/jquery-1.12.3.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/bootstrap.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/dataTables.bootstrap.min.js"></script>	
+  </head>
+  
+  <body>
+  
+  	<jsp:directive.include file="include/header.jsp" />
+  	
+  	<div id="contents" class="container-fluid">
+	  	<div class="panel panel-default">
+	  		<div class="panel-body">
+		  		<form id="serviceForm" class="form-inline col-md-7" role="form">
+		  			<input type="text" name="metaDataPath" class="form-control col-md-10" style="min-width:350px;" placeholder="请输入元数据地址" data-toggle="tooltip" title="服务发布成功"/>		
+		  			<input type="Button" name="submit" class="btn btn-primary col-md-2" value="发布" />
+		  		</form>
+		  		
+		  		<div class="input-group" class="col-md-5"> 
+		            <span class="input-group-addon">搜索</span> 
+		            <input id="searchInput" type="text" class="form-control" placeholder="查询接口"> 
+		        </div> 
+	  		</div>
+		</div>
+	  	
+	    <div class="table-responsive">
+	    	<table id="serviceContentTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+	    		<thead>
+	    			<tr>
+		    			<th class="col-md-2" >REST接口</th>
+		    			<th class="col-md-2" >SOAP接口</th>
+		    			<th class="col-md-1" >参数</th>
+		    			<th class="col-md-1" >类型</th>
+		    			<th class="col-md-2" >数据源</th>
+		    			<th class="col-md-2" >数据描述文件</th>
+		    			<th class="col-md-2" >SQL语句</th>
+		    		</tr>
+	    		</thead>
+	    		<tbody>
+	    			
+	    		</tbody>
+	    	</table>
+	    </div>
+    </div>
+   
+	<jsp:directive.include file="include/footer.jsp" />
+	
+    <script type="text/javascript">
+    	
+    	$(function(){
+    	    $("#serviceForm input[name='submit']").click(function(){
+    			Service.publish();
+    		});
+    		
+    		Service.reload();
+    		
+    		var table = $("#serviceContentTable").DataTable();
+	
+			// Event listener to filter input and redraw on input 
+			$("#searchInput").keyup( function() {
+				table.draw();
+			});
+    	});
+    	
+    	$.fn.dataTable.ext.search.push(
+			function( settings, data, dataIndex ) {
+				var search = $("#searchInput").val();
+				for(i in data){
+					if(data[i].indexOf(search)>=0){
+						return true;
+					}
+				}
+				return false;
+			}
+		);
+		
+    	var Service={
+    		table: $("#serviceContentTable").DataTable({
+    			"bAutoWidth": false,
+    			"ajax": "content",
+    			"columns":[
+    				{"data":"restApiName"},
+    				{"data":"soapApiName"},
+    				{"data":"parameters"},
+    				{"data":"sqlType"},
+    				{"data":"dataSource"},
+    				{"data":"metadataFile"},
+    				{"data":"sqlText"}
+    			],
+    			"bStateSave": true,
+    			"oLanguage": {
+					"sLengthMenu": "每页显示 _MENU_ 条记录",
+				    "sZeroRecords": "对不起，查询不到任何相关数据",
+				    "sInfo": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_ 条记录",
+				    "sInfoEmtpy": "找不到相关数据",
+				    "sInfoFiltered": "数据表中共为 _MAX_ 条记录)",
+				    "sProcessing": "正在加载中...",
+				    "sSearch": "搜索",
+				    "sUrl": "", 
+				    "oPaginate": {
+				    	"sFirst":    "第一页",
+				        "sPrevious": " 上一页 ",
+				        "sNext":     " 下一页 ",
+				        "sLast":     " 最后一页 "
+				     }
+				}, 
+				"aLengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+				"bInfo": false,
+				"bFilter": true,  //l-每页显示数量 f-过滤输入  t-表单Table i-信息  p-翻页 r-pRocessing
+				"sDom": '<"top"i>rt<"bottom"pl><"clear">',
+    		}),
+    		reload:function(){
+    			this.table.ajax.reload();
+	    	},
+	    	publish:function(){
+	    		var input = $("#serviceForm input[name='metaDataPath']");
+	    		var v = input.val();
+	    		$.post("publish", {metaDataPath:v}, function(data){
+	    			if(data.resultcode==0){
+	    				input.tooltip('show');
+	    				Service.reload();
+	    			}else{
+	    				input.tooltip('destroy');
+				        input.attr('title', "服务发布失败, message:"+data.message);
+				        input.tooltip('show');
+	    			}
+	    		}, "json")
+	    	}
+    	}
+    </script>
+    
+  </body>
+</html>

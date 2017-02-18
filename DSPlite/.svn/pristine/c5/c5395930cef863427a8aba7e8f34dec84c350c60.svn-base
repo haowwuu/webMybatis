@@ -1,0 +1,33 @@
+@CHARSET "UTF-8";
+#serviceContentTable
+{
+    table-layout:fixed;
+    word-wrap:break-word;
+}
+
+#serviceContentTable th{
+	text-align:center;
+}
+
+.container-fluid{
+	max-width:1024px;
+	margin：0 auto;
+	padding-left:15px;
+	padding-right:15px;
+}
+
+#navItem{
+	float:right;
+	margin-right:0;
+}
+.dataTables_length{
+	margin-top:10px;
+}
+footer{
+    color: #eee;
+    padding-top:60px;
+}
+
+footer .text-center{
+	padding-top:15px;
+}

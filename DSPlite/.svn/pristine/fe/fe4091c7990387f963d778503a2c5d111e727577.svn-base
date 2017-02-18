@@ -1,0 +1,35 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+
+<style type="text/css">
+.title{
+	font-size: 24px;
+}
+#navItem{
+	float:right;
+	margin-right:0;
+}
+.container-fluid{
+	max-width:1024px;
+	margin：0 auto;
+	padding-left:15px;
+	padding-right:15px;
+}
+
+</style>
+
+<header>
+	<nav class="navbar navbar-inverse" >
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand title" href="<%=basePath%>"><strong>数据共享平台</strong></a>
+			</div>
+			<div id="navItem">
+				<ul class="nav navbar-nav">
+					<li name=docs><a href="<%=basePath%>service_accordion.jsp">DOCS</a></li>
+					<li name=keys><a href="<%=basePath%>application.jsp">KEYS</a></li>
+					<li><a href="">QUESTIONS</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>

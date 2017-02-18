@@ -1,0 +1,50 @@
+/*
+ * File Name: AppMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+
+import com.cetiti.dsp.model.APPinfo;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-9-22
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public interface AppMapper {
+	
+	@Select("SELECT * FROM key_secret")
+	@Results({ 
+	      @Result(property = "appKey", column = "app_key"), 
+	      @Result(property = "appSecret", column = "app_secret")
+	  })
+	List<APPinfo> selectList();
+	
+	@Select("SELECT * FROM key_secret")
+	List<Map> selectMap();
+	
+	APPinfo select(String key);
+	
+	int insert(APPinfo security);
+	
+	int update(APPinfo security);
+}

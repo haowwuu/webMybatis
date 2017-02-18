@@ -1,0 +1,56 @@
+package com.cetiti.dsp.servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.cetiti.dsp.model.AliaseInfo;
+import com.cetiti.dsp.service.AliaseService;
+import com.cetiti.dsp.service.impl.AliaseServiceImpl;
+
+public class SetAliase extends HttpServlet{
+	private static final long serialVersionUID = 1L;
+	public AliaseService aliaseService = new AliaseServiceImpl();
+    private static final Logger LOGGER = LoggerFactory.getLogger(APIServlet.class);
+    
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException,IOException{
+        Map<String, String> parameterMap = getRequestParameterMap(request);
+        //System.out.println(parameterMap.toString());
+        LOGGER.debug("request parameters:[{}]", parameterMap.toString());
+        response.setContentType("text/plain;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        //out.print(result);
+        out.flush();
+        out.close();
+    }
+           
+    @Override       
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException{
+        doGet(request, response);
+    }   
+    
+    public static Map<String, String> getRequestParameterMap(HttpServletRequest request){     
+        Map<String, String> pMap = new HashMap<String, String>();
+        Enumeration<String> enm = request.getParameterNames();
+        AliaseService aliaseService = new AliaseServiceImpl();  
+        while (enm.hasMoreElements()) {
+            String pName = (String) enm.nextElement();
+            String pValue = request.getParameter(pName);
+            //写入数据库
+            aliaseService.update(new AliaseInfo(pName,pValue));
+            pMap.put(pName, pValue);
+        }
+        return pMap;
+    }
+
+}

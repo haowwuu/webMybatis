@@ -1,0 +1,251 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	
+	<base href="<%=basePath%>">
+	
+	<title>service contents</title>
+	<meta http-equiv="keywords" content="dsp,contents,service">
+	<meta http-equiv="description" content="dsp main page">
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dataTables.bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dsp.css" />
+	<!-- CSS for the Vertical tab -->
+	<link rel="stylesheet" type="text/css" href=" <%=basePath%>resources/css/serviceTab.css" />
+	
+	<script type="text/javascript" src="<%=basePath%>js/jquery-1.12.3.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/bootstrap.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/dataTables.bootstrap.min.js"></script>
+
+</head>
+<body >
+
+	<header> 
+		<nav class="navbar navbar-inverse">
+		   <div class="container-fluid">
+			  <div class="navbar-header">
+				 <a class="navbar-brand" href="#">数据共享平台</a>
+			  </div>
+		   </div>
+		</nav> 
+	</header>
+
+	<div id="contents" class="container-fluid">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="input-group" class="col-md-5">
+					<span class="input-group-addon">搜索</span> 
+					<input id="searchInput" type="text" class="form-control" placeholder="查询接口">
+				</div>
+			</div>
+		</div>
+
+		<!--  print interface information -->
+		<div id="hero-slider" class="row">
+			<div id="tabLeft" class="col-md-2"></div>
+			<div class="mask" class="col-md-9" style="overflow-y:scroll;">
+				<div class="slider-body" id="interfaceInformation"></div>
+			</div>
+			<!-- .mask -->
+			<div class="clear" class="col-md-1"></div>
+		</div>
+		<!-- #hero-slider -->
+
+		<footer> 
+			<nav class="navbar navbar-inverse navbar-fixed-bottom">
+				<div class="navbar-inner navbar-content-center">
+					<div class="text-center">© <span>2016</span> <a href="http://www.cetiti.com/">中电海康集团有限公司</a>,Inc.All Rights Reserved.</div>
+				</div>
+			</nav> 
+		</footer>
+
+
+<script type="text/javascript">
+    var index;
+    function currentInterface(index,j){
+        $("#interface"+index+j.toString()).toggleClass('active');
+        for(var num = 1; num < interfaceNumber; num++){
+        	if(num==index) continue;
+        	$("#interface"+num+j).removeClass('active');
+        	}
+        }
+    
+    $(function(){
+        $("#serviceForm input[name='submit']").click(function(){
+            Service.publish();
+            });
+       Service.show();
+        // Event listener to the two range filtering inputs to redraw on input 
+      $("#searchInput").keyup( function() {
+    	var flag=true;
+        var search = $("#searchInput").val();
+        var serviceData = $.extend(true, {}, tempData);
+        $.extend(serviceData,tempData);
+        var testNSN=nameSpaceNumber;
+        if(search.trim()==""){
+        $("#hero-slider > div.mask").scrollTop(0);
+        }
+        //Reload the category
+        for (var i=1;i<serviceData.data.length+1;i++){
+            for (var j=testNSN; j>=0 ; j-- ){
+                $("#panel-"+i+j +"> h2").css({
+                    "color":"#0058a9",
+                    "background-color":"#F8F8F8",
+                    "font-size":"32px",
+                    });
+            }
+        }
+        for (var i=1;i<serviceData.data.length+1;i++){
+          if(((serviceData.data[i-1].restApiName.indexOf(search)>=0)
+            ||(serviceData.data[i-1].soapApiName.indexOf(search)>=0)
+            ||(serviceData.data[i-1].parameters.indexOf(search)>=0)
+            ||(serviceData.data[i-1].sqlType.indexOf(search)>=0))&&(search.trim()!="")){
+          //locate and highlight
+        	  for (var j=0; j < testNSN+1 ; j++){               
+        		 if( $("#panel-"+i+j +"> h2").scrollTop()!=null) {
+        			 if(flag==true){
+        				 $("#hero-slider > div.mask").scrollTop((i-1)*320+50);
+        				 flag =false;
+        			 }
+                  $("#panel-"+i+j +"> h2").css({
+                      "color":"white",
+                      "background-color":"#98bf21",
+                      "font-size":"20px",
+                      });
+        		 }
+        	  }
+          }	
+        }     
+      });
+    });
+    
+    $.fn.dataTable.ext.search.push(
+      function( settings, serviceData, dataIndex ) {
+        var search = $("#searchInput").val();
+        for(i in serviceData){
+          if(serviceData[i].indexOf(search)<0){
+            serviceData[i]="";		
+          }
+        }	
+        for(i in serviceData){
+          if(serviceData[i].indexOf(search)>=0){
+            return true;
+          }
+        }
+        return false;
+      }
+    );
+    
+    var tempData; 
+    var interfaceNumber=0;
+    var nameSpaceNumber = 0;
+    var Service={
+      show:function(){
+      var input = $("#serviceForm input[name='metaDataPath']");
+      var v = input.val();
+      $.post("content", {metaDataPath:v}, function(data){
+         //object clone 
+        tempData = $.extend(true, {}, data);
+        //HTML   begin
+        for (var i=1;i<data.data.length+1;i++){
+        	interfaceNumber =data.data.length;
+        	if (i==1){
+        		//1st accordion
+        		var text2="<ul><h4><a data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#collapse"
+                    +nameSpaceNumber.toString()+"\"><span class=\"portal_arrow\"></span>"+ data.data[0].nameSpace+"</a></h4>"
+                    +"<div id=\"collapse"+nameSpaceNumber.toString()+ "\" class=\"panel-collapse collapse in\"></div>";
+                $(text2).appendTo("#tabLeft");
+                txt1="<li><a href=\"service_accordion.jsp#panel-&num&&nsn&\"  id=\"interface&num&&nsn&\" class=\"active\" onClick=\"currentInterface(&num&,&nsn&)\">&selectId&</a></li>";
+                var text1=txt1.replace(/&num&/g , i.toString()).replace(/&nsn&/g , nameSpaceNumber.toString()).replace(/&selectId&/g , data.data[0].selectId);
+                $(text1).appendTo("#hero-slider  #tabLeft > ul div"); 
+        		}
+        	else{
+        		 //Check whether there exists new namepace
+        		  if(data.data[i-2].nameSpace!=data.data[i-1].nameSpace){
+	        		nameSpaceNumber ++;
+	        		var text2="<ul><h4><a data-toggle=\"collapse\" data-parent=\"#accordion\" class=\"collapsed\" href=\"#collapse"
+	        		+nameSpaceNumber.toString()+"\"><span class=\"portal_arrow\"></span>"+ data.data[i-1].nameSpace+"</a></h4>"
+	        		+"<div id=\"collapse"+nameSpaceNumber.toString()+ "\" class=\"panel-collapse collapse \"></div>";
+	        		//fill HTML code
+	                $(text2).appendTo("#tabLeft");
+        		 }
+	         txt1="<li><a href=\"service_accordion.jsp#panel-&num&&nsn&\"  id=\"interface&num&&nsn&\"  onClick=\"currentInterface(&num&,&nsn&)\">&selectId&</a></li>";
+	         var text1=txt1.replace(/&num&/g , i.toString()).replace(/&nsn&/g , nameSpaceNumber.toString()).replace(/&selectId&/g , data.data[i-1].selectId);
+	         $(text1).appendTo("#collapse"+nameSpaceNumber.toString());
+        	}	
+          // right  portion of the Vertical tab	 	
+          //template
+          var t1 ="<div class=\"panel\" id=\"panel-num\">"+ "<h2>&selectId&-接口信息</h2>";
+          var t2 ="<table class=\"table table-striped\"><thead><tr> <th>参数名称</th>  <th>参数值</th> </tr> </thead>"
+                         +"<tbody> <tr><td>REST接口地址</td><td><a href= &restApiName&  target=\"_blank\">&restApiName&</a></td><td>    </td></tr>";
+          var t3 ="<tr><td>SOAP接口地址</td> <td><a href= &soapApiName&  target=\"_blank\">&soapApiName&</a></td> <td>    </td></tr>";
+          var t4 ="<tr><td>参数</td><td>&outputParamters&</td><td>    </td></tr>";
+          var t5 ="<tr><td>类型</td><td>&type&</td><td>    </td></tr>";
+          var template = t1 + t2 + t3 + t4 + t5 ;			
+          var tr = template.replace(/num/g , i.toString()+nameSpaceNumber.toString())
+                        .replace(/&restApiName&/g, data.data[i-1].restApiName)
+                        .replace(/&soapApiName&/g, data.data[i-1].soapApiName)
+						.replace("&outputParamters&",  data.data[i-1].parameters)
+						.replace("&type&",  data.data[i-1].sqlType)
+                        .replace(/&selectId&/g , data.data[i-1].selectId);
+          document.getElementById("interfaceInformation").innerHTML +=tr;
+          // the end	
+           }	
+        },"json");	
+      },
+      publish:function(){
+        var input = $("#serviceForm input[name='metaDataPath']");
+        var v = input.val();
+        $.post("publish", {metaDataPath:v}, function(data){
+            if(data.resultcode==0){
+              input.tooltip('show');
+              //Service.show();
+              location.reload();
+            }
+            else{
+              input.tooltip('destroy');
+              input.attr('title', "服务发布失败, message:"+data.message);
+			  input.tooltip('show');
+		    }
+        }, "json")
+      }
+    }
+
+    $(document).ready(function () {
+        $("#hero-slider > div.mask").scroll(function () {
+        	
+            var panels = $("#interfaceInformation").find(".panel");
+            var menu = $("#tabLeft ul ");
+            var currentId = ""; 
+            panels.each(function () {
+                var m = $(this);
+                if ( m.offset().top<210) {
+                    currentId =m.attr("id");
+                } 
+                else {
+                    return false;
+                }
+            });
+            
+            var currentLink = menu.find(".active");
+            if (currentId && currentLink.attr("href") != currentId) {
+                currentLink.removeClass("active");
+                $("#interface"+currentId.substring(6,8)).addClass("active");
+            }
+        });
+    });
+    
+ </script>
+</body>
+</html>

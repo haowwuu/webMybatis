@@ -1,0 +1,113 @@
+/*
+ * File Name: AppServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.cetiti.dsp.model.APPinfo;
+import com.cetiti.dsp.service.AppService;
+import com.cetiti.dsp.service.impl.AppServiceImpl;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.Configration;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-31
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AppServlet extends DispatcherServlet{
+	
+	private static final long serialVersionUID = 1L;
+	private AppService appService = new AppServiceImpl();
+	private ApiResult retn = ApiResult.getDefaultActionResult();
+	
+	public void query(HttpServletRequest request, HttpServletResponse response){
+		Map<String, Object> data = new HashMap<String, Object>();
+	    data.put("data", appService.queryAll());
+		ApiResult.writeToResponse(response, data);
+	}
+	
+	public void add(HttpServletRequest request, HttpServletResponse response){
+		APPinfo app = getObjFromRequest(APPinfo.class, request);
+		appService.add(app);
+		retn.writeToResponse(response);
+	}
+	
+	public void update(HttpServletRequest request, HttpServletResponse response){
+		APPinfo app = getObjFromRequest(APPinfo.class, request);
+		appService.update(app);
+		retn.writeToResponse(response);
+	}
+	
+	public void delete(HttpServletRequest request, HttpServletResponse response){
+		String appId = request.getParameter("appId");
+		appService.delete(appId);
+		retn.writeToResponse(response);
+	}
+	
+	public void login(HttpServletRequest request, HttpServletResponse response){
+		String name = request.getParameter("name");
+		String password = request.getParameter("password");
+		String random = request.getParameter("random");
+		if(appService.appCheck(name, password, random)){
+			registSession(request);
+			retn.setData(getSessionMap(request));
+			retn.writeToResponse(response);
+		}else{
+			ApiResult resultNo = ApiResult.getDefaultFailResult();
+			resultNo.setMsg("认证信息错误");
+			resultNo.writeToResponse(response);
+		}
+	}
+	
+	private void registSession(HttpServletRequest request){
+		HttpSession session = request.getSession();
+		String name = request.getParameter("name");
+		session.setAttribute("account", name);
+		session.setAttribute("isAdmin", Configration.INSTANCE.isAdmin(name));
+	}
+	
+	private Map<String, Object> getSessionMap(HttpServletRequest request){
+		Map<String, Object> sessionMap = new HashMap<String, Object>();
+		HttpSession session = request.getSession();
+		if(null==session){
+			return sessionMap;
+		}
+		
+		Enumeration<String> names = session.getAttributeNames();
+		while (names.hasMoreElements()) {
+			String n = names.nextElement();
+			sessionMap.put(n, session.getAttribute(n));
+		}
+		return sessionMap;
+	}
+	
+	public void getSession(HttpServletRequest request, HttpServletResponse response){
+		ApiResult.writeToResponse(response, getSessionMap(request));
+	}
+	
+	public void logout(HttpServletRequest request, HttpServletResponse response){
+		HttpSession session = request.getSession();
+		session.invalidate();
+	}
+}

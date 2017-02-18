@@ -1,0 +1,70 @@
+
+<div class="container">
+    <div id="confirmModal" class="modal fade in" style="z-index:80;">
+        <div class="modal-dialog modal-content" style="margin-top:12%; width:400px;">
+            <div class="modal-header" style="background-color: #428bca; padding: 3px 10px;" ><strong>确定删除数据?</strong></div>
+            <div class="modal-body container-fluid">
+                <p class="confirm-content"></p>
+            </div>
+            <div class="modal-footer" style="padding:5px 15px;">
+                <button name="submit" class="btn btn-primary">确认</button>
+                <button class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<header>
+    <nav class="navbar navbar-inverse" >
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand title" href="service.html"><strong>数据共享平台</strong></a>
+            </div>
+            <div id="navItem">
+                <ul class="nav navbar-nav">
+                    <li name="user" id="dspUser">
+                        <a href="#" id="userAccount"></a>
+                        <div class="logout-panel">
+                            <ul class="rf-no-padding" >
+                                <li><a href="index.html#panel4UserTemp" style="text-decoration:none;">我的服务</a></li>
+                                <li onclick="dsp.logout();"><a style="text-decoration:none;">退出</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li name="login" id="dspLogin">
+                        <a a href="#">登录</a>
+                        <div class="container login-panel">
+                            <div class="container-fluid">
+                                <form id="loginForm" class="form-horizontal" role="form">
+                                   <p></p>
+                                   <div class="form-group has-feedback">
+                                        <div class="col-sm-12">            
+                                            <input type="text" class="form-control" name="name" placeholder="应用名称/appKey" title="请输入用户名称">
+                                        </div>    
+                                   </div>
+                                   <div class="form-group has-feedback">
+                                        <div class="col-sm-12">          
+                                            <input type="password" class="form-control" name="password" autocomplete="off" placeholder="请输入密码" title="请输入密码">
+                                        </div>    
+                                   </div>
+                                   <div class="form-group">
+                                        <div class="col-sm-6">    
+                                            <button type="button" name="submit" class="form-control btn btn-default" onclick="dsp.login();">登录</button>
+                                        </div>  
+                                        <div class="col-sm-6 default-padding-round">          
+                                            <input type="checkbox" value="1" name="rem" checked="checked" autocomplete="off" />
+                                            <span>下次自动登录</span>
+                                        </div>  
+                                   </div>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    <li name="docs"><a href="index.html">接口文档</a></li>
+                    <li name="keys"><a href="application.html">安全流量管理</a></li>
+                    <li name="stat"><a href="statistic.html">服务统计</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

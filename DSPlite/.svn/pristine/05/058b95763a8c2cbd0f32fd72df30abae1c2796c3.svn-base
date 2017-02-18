@@ -1,0 +1,97 @@
+/*
+ * File Name: AppMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import com.cetiti.dsp.model.APPinfo;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-9-22
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public interface AppMapper {
+	
+	@Select("select * from app_info")
+	@Results({ 
+		@Result(property = "appId", column = "app_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "appSecret", column = "app_secret"),
+		@Result(property = "appName", column = "app_name"),
+	    @Result(property = "appAddress", column = "app_address"),
+		@Result(property = "description", column = "description"),
+		@Result(property = "appAdmin", column = "app_admin"),
+		@Result(property = "adminEmail", column = "admin_email"),
+		@Result(property = "adminTel", column = "admin_tel")
+	})
+	List<APPinfo> selectList();
+	
+	@Select("select * from app_info where app_key = #{key}")
+	@Results({ 
+		@Result(property = "appId", column = "app_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "appSecret", column = "app_secret"),
+		@Result(property = "appName", column = "app_name"),
+	    @Result(property = "appAddress", column = "app_address"),
+		@Result(property = "description", column = "description"),
+		@Result(property = "appAdmin", column = "app_admin"),
+		@Result(property = "adminEmail", column = "admin_email"),
+		@Result(property = "adminTel", column = "admin_tel")
+	})
+	APPinfo select(String key);
+	
+	@Select("select * from app_info where app_address = #{appAddress}")
+	@Results({ 
+		@Result(property = "appId", column = "app_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "appSecret", column = "app_secret"),
+		@Result(property = "appName", column = "app_name"),
+	    @Result(property = "appAddress", column = "app_address"),
+		@Result(property = "description", column = "description"),
+		@Result(property = "appAdmin", column = "app_admin"),
+		@Result(property = "adminEmail", column = "admin_email"),
+		@Result(property = "adminTel", column = "admin_tel")
+	})
+	APPinfo selectByAddress(String appAddress);
+	
+	@Insert("insert into app_info (app_id, app_key, app_secret, app_name, app_address, " +
+			"description, app_admin, admin_email, admin_tel) " +
+			"values (#{appId}, #{appKey}, #{appSecret}, #{appName}, #{appAddress}, " +
+			"#{description}, #{appAdmin}, #{adminEmail}, #{adminTel})")
+	int insert(APPinfo appinfo);
+	
+	@Update("update app_info set app_name = #{appName}, " +
+				"app_name = #{appName}, " +
+				"app_address = #{appAddress}, " +
+				"description = #{description}, " +
+				"app_admin = #{appAdmin}, " +
+				"admin_email = #{adminEmail}, " +
+				"admin_tel = #{adminTel} " +
+			"where app_id = #{appId}")
+	int update(APPinfo appinfo);
+	
+	@Delete("delete from app_info where app_id = #{appId}")
+	int delete(String appId);
+}

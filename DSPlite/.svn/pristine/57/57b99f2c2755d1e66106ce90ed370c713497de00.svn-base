@@ -1,0 +1,64 @@
+/*
+ * File Name: AppServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.model.APPinfo;
+import com.cetiti.dsp.service.AppService;
+import com.cetiti.dsp.service.impl.AppServiceImpl;
+import com.cetiti.dsp.util.ApiResult;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-31
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AppServlet extends DispatcherServlet{
+	
+	private static final long serialVersionUID = 1L;
+	private AppService appService = new AppServiceImpl();
+	
+	public void query(HttpServletRequest request, HttpServletResponse response){
+		Map<String, Object> data = new HashMap<String, Object>();
+	    data.put("data", appService.queryAll());
+		ApiResult.writeToResponse(response, data);
+	}
+	
+	public void add(HttpServletRequest request, HttpServletResponse response){
+		ApiResult retn = ApiResult.getDefaultActionResult();
+		APPinfo app = getObjFromRequest(APPinfo.class, request);
+		appService.add(app);
+		retn.writeToResponse(response);
+	}
+	
+	public void update(HttpServletRequest request, HttpServletResponse response){
+		ApiResult retn = ApiResult.getDefaultActionResult();
+		APPinfo app = getObjFromRequest(APPinfo.class, request);
+		appService.update(app);
+		retn.writeToResponse(response);
+	}
+	
+	public void delete(HttpServletRequest request, HttpServletResponse response){
+		String appId = request.getParameter("appId");
+		appService.delete(appId);
+	}
+}

@@ -1,0 +1,163 @@
+/*
+ * File Name: SqlSessionFactoryWapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-18
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-18
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+import java.sql.Connection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.TransactionIsolationLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-18
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class SqlSessionFactoryWapper implements SqlSessionFactory{
+	
+	private static Logger LOGGER = LoggerFactory.getLogger(SqlSessionFactoryWapper.class);
+	private static final int maxSize = 20;
+	private SqlSessionFactory sqlSessionFactory;
+	private static Map<String, SqlSession> sessionRepos;
+			
+	public SqlSessionFactoryWapper(SqlSessionFactory sqlSessionFactory){
+		if(null==sqlSessionFactory){
+			throw new IllegalArgumentException("sqlsessionFactroy null");
+		}
+		this.sqlSessionFactory = sqlSessionFactory;
+		
+		if(null == sessionRepos){
+			sessionRepos = new LinkedHashMap<String, SqlSession>(maxSize, .75F, true) {
+				private static final long serialVersionUID = 8176376841222294399L;
+				@Override
+				protected boolean removeEldestEntry(Map.Entry eldest) {
+			        return size() > maxSize; 
+			    }
+			};
+		}
+		
+	}
+	
+	public static void removeSession(String key){
+		if(null==sessionRepos){
+			return;
+		}
+		synchronized (sessionRepos) {
+			SqlSession session = sessionRepos.get(key);
+			if(null==session){
+				return;
+			}
+			try {
+				session.close();
+			} catch (Exception e) {
+				LOGGER.error("session [{}] closse exception.", key);
+				try {
+					session.rollback();
+				} catch (Exception e2) {
+					// ignore
+				}
+			} finally{
+				sessionRepos.remove(key);
+				try {
+					session.close();
+				} catch (Exception e2) {
+					// ignore
+				}
+			}
+		}
+	}
+	
+	public static void clearSession(){
+		if(null==sessionRepos){
+			return;
+		}
+		for(String key:sessionRepos.keySet()){
+			removeSession(key);
+		}
+	}
+	
+	@Override
+	public synchronized SqlSession openSession() {
+		synchronized (sessionRepos) {
+			Configuration configuration = getConfiguration();
+			if(null==configuration){
+				return sqlSessionFactory.openSession();
+			}
+			String key = SqlSessionFactoryRepos.getDataSourceKey(configuration.getEnvironment().getDataSource());
+			if(null==sessionRepos.get(key)){
+				sessionRepos.put(key, sqlSessionFactory.openSession());
+			}
+			return sessionRepos.get(key);
+		}
+	}
+
+	
+	@Override
+	public SqlSession openSession(boolean flag) {
+		return sqlSessionFactory.openSession(flag);
+	}
+
+	
+	@Override
+	public SqlSession openSession(Connection connection) {
+		return sqlSessionFactory.openSession(connection);
+	}
+
+	
+	@Override
+	public SqlSession openSession(TransactionIsolationLevel transactionisolationlevel) {
+		return sqlSessionFactory.openSession(transactionisolationlevel);
+	}
+
+	
+	@Override
+	public SqlSession openSession(ExecutorType executortype) {
+		return sqlSessionFactory.openSession(executortype);
+	}
+
+	
+	@Override
+	public SqlSession openSession(ExecutorType executortype, boolean flag) {
+		return sqlSessionFactory.openSession(executortype, flag);
+	}
+
+	
+	@Override
+	public SqlSession openSession(ExecutorType executortype,
+			TransactionIsolationLevel transactionisolationlevel) {
+		return sqlSessionFactory.openSession(executortype, transactionisolationlevel);
+	}
+
+	
+	@Override
+	public SqlSession openSession(ExecutorType executortype, Connection connection) {
+		return sqlSessionFactory.openSession(executortype, connection);
+	}
+
+	
+	@Override
+	public Configuration getConfiguration() {
+		return sqlSessionFactory.getConfiguration();
+	}
+
+}

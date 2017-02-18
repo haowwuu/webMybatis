@@ -1,0 +1,130 @@
+/*
+ * File Name: CodeGenerator.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-9
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-9
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetit.dsp.soap;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.util.ApiRequestDirector;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-9
+ * @see       
+ * @since     DSPlite V0.2.0
+ */ 
+public class CodeGenerator {
+	private static String SOURCE_IMPORT = " import java.util.HashMap; "
+										+" import java.util.Map;  "										
+										+" import javax.jws.WebService;  "
+										+" import com.cetiti.dsp.util.ApiRequestDirector;  ";
+	
+	//private static String SOURCE_TAG = " @WebService(targetNamespace=\"com.cet.n\")  targetNamespace="http://dsp.cetiti.com/" ";
+
+	private APIinfo apiInfo;
+	
+	public String queryMethod(String args){
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("args", args);
+		return ApiRequestDirector.doRequest(apiInfo.getApiName(), param);
+	}
+	
+	public static Map<String, String> generateSource(Collection<APIinfo> apiInfos){
+		Map<String, Set<APIinfo>> groups = new HashMap<String, Set<APIinfo>>();
+		for(APIinfo info: apiInfos){
+			Set<APIinfo> subgroup = groups.get(info.getNameSpace());
+			if(null==subgroup){
+				subgroup = new HashSet<APIinfo>();
+				subgroup.add(info);
+				groups.put(info.getNameSpace(), subgroup);
+			}else{
+				subgroup.add(info);
+			}
+		}
+		Map<String,String> sourceMap = new HashMap<String,String>();
+		for(Entry<String, Set<APIinfo>> entry: groups.entrySet()){
+			StringBuilder sb = new StringBuilder();
+			int idx = entry.getKey().lastIndexOf(".");
+			String pakage = entry.getKey().substring(0, idx);
+			String clazz = entry.getKey().substring(idx+1);
+			
+			sb.append(" package ");
+			sb.append(pakage);
+			sb.append(";");
+			
+			sb.append(SOURCE_IMPORT);
+			sb.append("@WebService(targetNamespace=\"");
+			sb.append(packageToNamespace(pakage));
+			sb.append("\")  "); 
+			
+			sb.append("public class ");
+			sb.append(clazz);
+			sb.append("{  ");
+			
+			for(APIinfo info:entry.getValue()){
+				sb.append("public String ");
+				sb.append(info.getSelectId());
+				sb.append("(");
+				boolean hasParam = false;
+				for(String p:info.getParameters()){
+					sb.append("String ");
+					sb.append(p);
+					sb.append(",");
+					hasParam = true;
+				}
+				if(hasParam){
+					sb.deleteCharAt(sb.lastIndexOf(","));
+				}
+				sb.append("){  ");
+				sb.append("Map<String, String> param = new HashMap<String, String>(); ");
+				for(String p:info.getParameters()){
+					sb.append("param.put(\"");
+					sb.append(p);
+					sb.append("\", ");
+					sb.append(p);
+					sb.append(");  ");
+				}
+				sb.append("return ApiRequestDirector.doRequest(\"");
+				sb.append(info.getApiName());
+				sb.append("\", param);}  ");
+			}
+			sb.append("}  ");
+			sourceMap.put(entry.getKey(),sb.toString());
+		}
+		
+		return sourceMap;
+	}
+	
+	private static String packageToNamespace(String pakage){
+		if(null==pakage){
+			return null;
+		}
+		String[] arr = pakage.split("\\.");
+		StringBuilder sb = new StringBuilder();
+		sb.append("http://");
+		for(int i=arr.length; i>0; i--){
+			sb.append(arr[i-1]);
+			sb.append(".");
+		}
+		
+		return sb.substring(0, sb.length()-1).toString();
+	}
+
+}

@@ -1,0 +1,100 @@
+/*
+ * File Name: StatisticServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-11-17
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-11-17
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.service.AuditTrailService;
+import com.cetiti.dsp.service.impl.AuditTrailServiceImpl;
+import com.cetiti.dsp.util.ApiResult;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-11-17
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class StatisticServlet extends DispatcherServlet{
+	
+	private static final long serialVersionUID = 1L;
+	AuditTrailService atService = new AuditTrailServiceImpl();
+	DateFormat df = new SimpleDateFormat();
+	
+	public void statisticByApi(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		String sbegin = request.getParameter("begin");
+		String send = request.getParameter("end");
+		String n = request.getParameter("n");
+		String api = request.getParameter("api");
+		Date begin, end;
+		if(null!=send){
+			end = df.parse(send);
+		}else{
+			end = new Date();
+		}
+		if(null!=sbegin){
+			begin = df.parse(sbegin);
+		}else {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(end);
+			cal.add(Calendar.HOUR, -1);
+			begin = cal.getTime();
+		}
+		int topN=0;
+		if(null!=n){
+			topN = Integer.parseInt(n);
+		}
+		
+		Map<String, List<Object[]>> data = atService.statisticByApi(begin, end, api, topN);
+		ApiResult.writeToResponse(response, data);
+	}
+	
+	public void statisticByKey(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		String sbegin = request.getParameter("begin");
+		String send = request.getParameter("end");
+		String n = request.getParameter("n");
+		String key = request.getParameter("key");
+		Date begin, end;
+		if(null!=send){
+			end = df.parse(send);
+		}else{
+			end = new Date();
+		}
+		if(null!=sbegin){
+			begin = df.parse(sbegin);
+		}else {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(end);
+			cal.add(Calendar.HOUR, -1);
+			begin = cal.getTime();
+		}
+		int topN=0;
+		if(null!=n){
+			topN = Integer.parseInt(n);
+		}
+		
+		Map<String, List<Object[]>> data = atService.statisticByKey(begin, end, key, topN);
+		ApiResult.writeToResponse(response, data);
+	}
+	
+}

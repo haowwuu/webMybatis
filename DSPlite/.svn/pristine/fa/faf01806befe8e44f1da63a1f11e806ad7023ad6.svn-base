@@ -1,0 +1,139 @@
+/*
+ * File Name: RestMessageFilterTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-28
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-28
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.cetiti.dsp.util.EncryptUtil;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-28
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class RestMessageFilterTest {
+
+	/*static String appKey = "651b8690674d6579672d92b475a4d75d";
+	static String appSecret = "c0c3707be7da0fb2dab04947729a648d";
+	
+	private String baseUrl = "http://localhost:8080/DSPlite/api/";*/
+	
+	static String appKey = "bbf597b960dd074a9baf0f21a58bb667";
+	static String appSecret = "763529545853a4fe5118121fd8e22447";
+		
+	private String baseUrl = "http://10.0.10.78:8180/dsplite/api/";
+	
+	static Map<String, String> setSignature(Map<String, String> map){
+		if (null == map) {
+			map = new HashMap<String, String>();
+		}
+		map.put("appKey", appKey);
+		map.put("timestamp", String.valueOf(System.currentTimeMillis()));
+		
+		Map<String, String> sortedParams = new TreeMap<String, String>(map);
+		Set<Entry<String, String>> entrys = sortedParams.entrySet();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(appSecret);
+		for (Entry<String, String> param : entrys) {
+			if (param.getValue() != null) {
+				sb.append(param.getKey()).append(param.getValue().trim());
+			}
+		}
+		sb.append(appSecret);
+		String sign = EncryptUtil.md5(sb.toString());
+		//System.out.println("clientSign:" + sign + "  sb:" + sb.toString());
+		map.put("sign", sign);
+
+		return map;
+	}
+	
+	static boolean isSuccess(String result){
+		if(null==result){
+			return false;
+		}
+		
+		return result.indexOf("\"resultcode\":\"0\"")>=0;
+	}
+	
+	@Test
+	public void testSelectStrategys() throws Exception {
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectStrategys";
+		String retn = HttpUtil.doPost(url, setSignature(null));
+		
+		assertTrue(isSuccess(retn));
+	}
+	
+	@Test
+	public void testSelectLevelsWithParams() throws Exception{
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectLevelsWithParams";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("levelid", "3");
+		paramMap.put("levelname", "level5");
+		String retn = HttpUtil.doPost(url, setSignature(paramMap));
+		//System.out.println(retn);
+		assertTrue(isSuccess(retn));
+	}
+	
+	@Test
+	public void testSelectTableWithDsql() throws Exception{
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectTableWithDsql";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("sql", "t_dsp_errorcode where errorid<3");
+		String retn = HttpUtil.doPost(url, setSignature(paramMap));
+		
+		//System.out.println(retn);
+		assertTrue(isSuccess(retn));
+	}
+	
+	
+	public static void main(String[] args) throws Exception{
+		RestMessageFilterTest rest = new RestMessageFilterTest();
+		long start = System.currentTimeMillis();
+		while (true) {
+			try {
+				long now = System.currentTimeMillis();
+				if(now-start>10*1000){
+					start = now;
+					System.out.println("running"+now);
+					rest.testSelectLevelsWithParams();
+					if(now%2==0){
+						rest.testSelectStrategys();
+					}
+					if(now%4==0){
+						rest.testSelectTableWithDsql();
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+	}
+
+}

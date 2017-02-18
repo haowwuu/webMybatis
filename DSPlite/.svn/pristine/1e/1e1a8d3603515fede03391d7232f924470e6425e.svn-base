@@ -1,0 +1,56 @@
+/*
+ * File Name: Timer.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-27
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-27
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-27
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class Timer {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Timer.class);
+	private static ScheduledExecutorService ses; 
+	
+	private static Runnable timerTask = new Runnable() {
+		@Override
+		public void run() {
+			ApiRequestRepos.refresh();
+			LOGGER.debug("Timer working");
+		}
+	};
+	
+	public static void startup(){
+		if(null==ses){
+			ses = Executors.newSingleThreadScheduledExecutor();
+			ses.scheduleAtFixedRate(timerTask, 99, 99, TimeUnit.SECONDS);
+		}
+	}
+	
+	public static void shutdown(){
+		if(null!=ses){
+			ses.shutdown();
+		}
+	}
+	
+}

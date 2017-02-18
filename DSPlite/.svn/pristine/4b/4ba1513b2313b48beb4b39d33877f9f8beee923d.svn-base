@@ -1,0 +1,50 @@
+/*
+ * File Name: AuditTrailMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-21
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-21
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+
+import com.cetiti.dsp.model.AuditTrail;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-21
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public interface AuditTrailMapper {
+	
+	@Insert("insert into audit_trail (audit_id, app_key, api_method, api_type, parameters, audit_date) " +
+			"values (#{auditId}, #{appKey}, #{apiMethod}, #{apiType}, #{parameters}, #{auditDate})")
+	int insert(AuditTrail auditTrail);
+	
+	@Select("select * from audit_trail")
+	@Results({ 
+		@Result(property = "auditId", column = "audit_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "apiMethod", column = "api_method"),
+		@Result(property = "apiType", column = "api_type"),
+	    @Result(property = "parameters", column = "parameters"),
+		@Result(property = "auditDate", column = "audit_date")
+	})
+	List<AuditTrail> selectList();
+	
+}

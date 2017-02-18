@@ -1,0 +1,52 @@
+/*
+ * File Name: SecurityMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Many;
+import org.apache.ibatis.annotations.One;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+
+import com.cetiti.dsp.model.APISecurity;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-22
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public interface SecurityMapper {
+	
+	@Select("SELECT * FROM key_secret")
+	@Results({ 
+	      @Result(property = "appKey", column = "app_key"), 
+	      @Result(property = "appSecret", column = "app_secret")
+	  })
+	List<APISecurity> selectList();
+	
+	@Select("SELECT * FROM key_secret")
+	List<Map> selectMap();
+	
+	APISecurity select(String key);
+	
+	int insert(APISecurity security);
+	
+	int update(APISecurity security);
+}

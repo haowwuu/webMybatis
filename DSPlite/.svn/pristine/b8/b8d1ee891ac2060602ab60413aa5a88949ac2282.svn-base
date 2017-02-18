@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <display-name></display-name>	
+  <welcome-file-list>
+    <welcome-file>authority-manager.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <listener>
+      <listener-class>com.cetiti.dsp.servlet.InitListener</listener-class>
+  </listener> 
+    
+  <servlet>
+      <servlet-name>APIServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.servlet.APIServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>APIServlet</servlet-name>
+      <url-pattern>/api/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>APIContentServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.servlet.APIDetailServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>APIContentServlet</servlet-name>
+      <url-pattern>/content</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>publishServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.servlet.PublishServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>publishServlet</servlet-name>
+      <url-pattern>/publish</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+      <servlet-name>consoleServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.servlet.ConsoleServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>consoleServlet</servlet-name>
+      <url-pattern>/console</url-pattern>
+  </servlet-mapping>
+  
+<!--   servlet 4 filter -->
+
+
+    <servlet>
+      <servlet-name>LoginServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.filter.LoginServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>LoginServlet</servlet-name>
+      <url-pattern>/LoginServlet</url-pattern>
+  </servlet-mapping>
+  
+  
+     <servlet>
+      <servlet-name>AuthorityServlet</servlet-name>
+      <servlet-class>com.cetiti.dsp.filter.AuthorityServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+      <servlet-name>AuthorityServlet</servlet-name>
+      <url-pattern>/AuthorityServlet</url-pattern>
+  </servlet-mapping>
+  
+  
+  <filter>
+      <display-name>TrafficStatFilter</display-name>
+      <filter-name>TrafficStatFilter</filter-name>
+      <filter-class> com.cetiti.dsp.filter.TrafficStatFilter</filter-class>
+      <init-param>
+      <description></description>
+      <param-name>InterfaceAccessLimit</param-name>
+      <param-value>15</param-value>
+      </init-param>
+      <init-param>
+      <description>SuperUser can access to all the interfaces as he wishes</description>
+      <param-name>SuperUser</param-name>
+      <param-value>Aladdin</param-value>
+      </init-param>
+  </filter>
+  <filter-mapping>
+      <filter-name>TrafficStatFilter</filter-name>
+      <url-pattern>/api/*</url-pattern>
+      </filter-mapping>
+</web-app>

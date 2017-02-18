@@ -1,0 +1,64 @@
+/*
+ * File Name: InstructionExecutor.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-19
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-19
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+import com.cetiti.dsp.ds.DataSourceFactory;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-19
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class InstructionExecutor {
+	
+	public static void clearRepos(String[] args){
+		if(null==args){
+			return;
+		}
+		for(String key:args){
+			if("all".equalsIgnoreCase(key)){
+				SqlSessionFactoryRepos.clear();
+				break;
+			}
+			SqlSessionFactoryRepos.remove(key);
+		}
+	}
+	
+	public static void deleteService(String[] args){
+		if(null==args){
+			return;
+		}
+		int len = args.length;
+		if(len==1){
+			SqlSessionFactoryRepos.removeServcice(args[0], null);
+		}else if(len==2){
+			SqlSessionFactoryRepos.removeServcice(args[0], args[1]);
+		}
+	}
+	
+	public static String createDatabase(String[] args){
+		if(null==args||args.length<1){
+			return null;
+		}
+		if("sure".equalsIgnoreCase(args[0])){
+			DataSourceFactory.createSchemaAndLoadData();
+			return "database initiated";
+		}
+		return null;
+	}
+}

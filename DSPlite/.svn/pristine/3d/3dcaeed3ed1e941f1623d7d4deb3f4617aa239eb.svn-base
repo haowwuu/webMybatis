@@ -1,0 +1,100 @@
+@charset "utf-8";
+
+#hero-slider {
+	text-align: left;
+	background-color: #F8F8F8;
+	border: 1px solid #ccc;
+	width: 992px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	margin: 0 auto;
+	font-family: arial;
+}
+
+#hero-slider .mask {
+	background-color: #F8F8F6;
+	float: left;
+	width: 850px;
+	height: 560px;
+	margin: 15px 15px 15px 15px;
+	overflow: hidden;
+}
+
+#hero-slider .mask p {
+	font-weight: bold;
+	padding: 10px 20px;
+	margin: 10px 20px;
+}
+
+#hero-slider .mask h2 {
+	font-size: 32px;
+	padding: 15px 25px;
+	text-shadow: 0 0 1px #999;
+	font-weight: bold;
+	border-bottom: 1px solid #F8F8F8;
+	border-bottom-style: outset;
+}
+
+#hero-slider .mask pre {
+	width: 500px;
+}
+
+#hero-slider .mask p1 {
+	font: 12px "MicroSoft YaHei", "Courier New", "Andale Mono", monospace;
+	padding: 10px 20px;
+	border: 1px solid #ccc;
+	color: #333;
+	background-color: #F8F8F8;
+	line-height: 20px;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+	border-radius: 3px;
+	margin: 20px 40px;
+}
+
+#hero-slider .panel {
+	width: 850px;
+	height: 560px;
+	text-align: left;
+}
+
+#hero-slider ul {
+	margin: 0;
+	padding: 15px 15px 0 15px;
+	list-style: none;
+	float: left;
+	border-right: 1px solid #dedede;
+	height: 570px;
+}
+
+#hero-slider ul li a {
+	margin: 10px 0;
+	background: url(../images/button_up.png) no-repeat 0 0;
+}
+
+#hero-slider ul a {
+	outline: none;
+	text-decoration: underline;
+	display: block;
+	width: 75px;
+	height: 74px;
+	text-indent: -999em;
+}
+
+#hero-slider ul li  .active {
+	margin: 10px 0;
+	background: url(../images/button_down.png) no-repeat 0 0;
+}
+
+.panel h2 {
+	padding: 15px 0 0 0;
+	color: #0058a9;
+}
+
+.panel p {
+	color: #666;
+}
+
+.clear {
+	clear: both
+}

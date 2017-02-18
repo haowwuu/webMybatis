@@ -1,0 +1,123 @@
+/*
+ * File Name: DataSourceFactory.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.ds;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-9-22
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class DataSourceFactory {
+	
+	private static final String DSP_DS = "com/cetiti/dsp/ds/MapperConfig.xml";
+	private static final String DSP_DDL = "com/cetiti/dsp/ds/dsp-schema.sql";
+	private static final String DSP_DATA = "com/cetiti/dsp/ds/dsp-data.sql";
+	private static SqlSessionFactory sqlSessionFactory;
+	
+	private static void createSqlSessionFactory() {
+		try {
+			/*System.setProperty("user.dir", DataSourceFactory.class.getResource("/").
+					getPath().replaceAll("%20", " "));*/
+			Reader reader = Resources.getResourceAsReader(DSP_DS);
+		    sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+		    reader.close();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getMapper(Class<T> type) {
+		return (T)Proxy.newProxyInstance(DataSourceFactory.class.getClassLoader(), 
+				new Class[]{type}, new MapperProxy<T>(type));
+	}
+	
+	private static class MapperProxy<T> implements InvocationHandler{
+
+		private Class<T> type;
+		
+		MapperProxy(Class<T> type) {
+			this.type = type;
+		}
+		
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			if(null==sqlSessionFactory){
+				createSqlSessionFactory();
+			}
+			SqlSession session = sqlSessionFactory.openSession(true);
+			T mapper = session.getMapper(this.type);
+			Object retn = method.invoke(mapper, args);
+			session.close();
+			//System.out.println("session closed");
+			return retn;
+		}
+		
+	}
+	
+	public static void createSchemaAndLoadData() {
+		if(null==sqlSessionFactory){
+			createSqlSessionFactory();
+		}
+		DataSource ds = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
+		try {
+			runScript(ds, DSP_DDL);
+			runScript(ds, DSP_DATA);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}	
+	}
+	
+	private static void runScript(DataSource ds, String resource) throws IOException, SQLException {
+		Connection connection = ds.getConnection();
+		try {
+			ScriptRunner runner = new ScriptRunner(connection);
+			runner.setAutoCommit(true);
+			runner.setStopOnError(false);
+			runner.setLogWriter(null);
+			runner.setErrorLogWriter(null);
+			runScript(runner, resource);
+		} finally {
+			connection.close();
+		}
+	}
+	
+	private static void runScript(ScriptRunner runner, String resource) throws IOException, SQLException {
+		Reader reader = Resources.getResourceAsReader(resource);
+		try {
+			runner.runScript(reader);
+		} finally {
+			reader.close();
+		}
+	}
+	
+}

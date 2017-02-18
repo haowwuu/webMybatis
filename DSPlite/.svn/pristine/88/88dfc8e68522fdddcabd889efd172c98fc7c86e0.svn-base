@@ -1,0 +1,102 @@
+/*
+ * File Name: PublishServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-30
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-30
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.net.URL;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetit.dsp.soap.ServicePublisher;
+import com.cetiti.dsp.builder.SqlSessionFactoryBuilder;
+import com.cetiti.dsp.service.ResourcePathService;
+import com.cetiti.dsp.service.impl.ResourcePathServiceImpl;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+import com.cetiti.dsp.model.APIinfo; 
+import com.cetiti.dsp.util.ApiRequestDirector; 
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-8-30
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class PublishServlet extends HttpServlet{
+	
+	private static final long serialVersionUID = -6143857686941927628L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(PublishServlet.class);
+	private ResourcePathService rpService = new ResourcePathServiceImpl();
+	
+	@Override
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException,IOException{
+		ApiResult result = ApiResult.getDefaultActionResult();
+		
+		String metaDataPath = request.getParameter("metaDataPath");
+		if(null==metaDataPath||metaDataPath.indexOf(".xml")<0){
+			result.setResultcode(ApiResult.CODE.RET_NO);
+			result.setMsg("metaDataPath null or not xml resource.");
+			result.writeToResponse(response);
+			return;
+		}
+		
+		try {
+			if(metaDataPath.indexOf("://")<0){
+				File file = new File(metaDataPath);
+				if(file.exists()){
+					metaDataPath = file.toURI().toURL().toString();
+				}else{
+					URL url = Resources.getResourceURL(metaDataPath);
+					metaDataPath = url.toString();
+				}
+			}
+			Reader configReader = Resources.getUrlAsReader(metaDataPath);
+			SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configReader);
+			SqlSessionFactoryRepos.addSqlSessionFactory(sqlSessionFactory, metaDataPath);
+			
+			ServicePublisher.publish(SqlSessionFactoryRepos.getApiInfos());
+			
+		    configReader.close();
+		    //MetadataPathRepos.saveMetadataPath(metaDataPath);
+		    rpService.save(metaDataPath);
+		    result.setMsg("success");
+		} catch (Exception e) {
+			LOGGER.error("metaDataPath:[{}] doGet: [{}]", metaDataPath, e.getMessage());
+			result.setResultcode(ApiResult.CODE.RET_NO);
+			result.setMsg(e.getMessage());
+		}
+		
+		result.writeToResponse(response);
+	}
+	
+	@Override	    
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException, IOException{
+        doGet(request, response);
+    }	
+	
+}

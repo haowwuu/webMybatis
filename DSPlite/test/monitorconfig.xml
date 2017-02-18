@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MonitorConfig>
+	<serverIp>10.70.7.71</serverIp>
+	<serverPort>8901</serverPort>
+	<appKey>e50123af5ee11bc8a26732c2d05e1f9c</appKey>
+	<statusList>
+		<StatusItem>
+			<statusId>cpu</statusId>
+			<statusName>处理器</statusName>
+			<statusUnit>%</statusUnit>
+			<statusDes>处理器使用率</statusDes>
+			<statusType>0</statusType>
+			<statusIndex>0</statusIndex>
+			<timeInterval>5</timeInterval>
+			<detectClass>com.cetiti.monitor.status.CPUStatusDetector</detectClass>
+		</StatusItem>
+		<StatusItem>
+			<statusId>DiskUsed</statusId>
+			<statusName>磁盘使用率</statusName>
+			<statusUnit>%</statusUnit>
+			<statusDes>磁盘使用率</statusDes>
+			<statusType>0</statusType>
+			<statusIndex>1</statusIndex>
+			<timeInterval>5</timeInterval>
+			<detectClass>com.cetiti.monitor.status.DiskUsedStatusDetector</detectClass>
+		</StatusItem>
+		<StatusItem>
+			<statusId>Mem</statusId>
+			<statusName>内存使用率</statusName>
+			<statusUnit>%</statusUnit>
+			<statusDes>内存使用率</statusDes>
+			<statusType>0</statusType>
+			<statusIndex>2</statusIndex>
+			<timeInterval>5</timeInterval>
+			<detectClass>com.cetiti.monitor.status.MemStatusDetector</detectClass>
+		</StatusItem>
+	</statusList>
+</MonitorConfig>

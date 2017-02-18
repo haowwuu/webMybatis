@@ -1,0 +1,73 @@
+/*
+ * File Name: APIDetailServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-26
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-26
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.model.KeyValue;
+import com.cetiti.dsp.service.AliaseService;
+import com.cetiti.dsp.service.impl.AliaseServiceImpl;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.ApiResultFormater;
+import com.cetiti.dsp.util.ApiResultFormaterFactory;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-8-26
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class APIDetailServlet extends DispatcherServlet{
+	
+	private static final long serialVersionUID = 7934699425990017164L;
+	private AliaseService aliaseService = new AliaseServiceImpl();
+
+	public void content(HttpServletRequest request, HttpServletResponse response){
+	    AliaseService aliaseService = new AliaseServiceImpl();
+        List<KeyValue<String, String>> listAliaseInfo = aliaseService.queryAll();
+        ApiResultFormater formater = ApiResultFormaterFactory.getApiResultFormater("json");
+        String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+
+                request.getContextPath()+APIServlet.API_PATH;
+        Collection<APIinfo> apiInfos = SqlSessionFactoryRepos.getApiInfos();
+        for(APIinfo api:apiInfos){
+            api.buildRestApiName(basePath);
+            api.buildSoapApiName();
+            if(null!=aliaseService.getAlias(api.getNameSpace())){
+                api.setNameSpace(aliaseService.getAlias(api.getNameSpace()));
+            }
+            if(null!=aliaseService.getAlias(api.getApiName())){
+                api.setSelectId(aliaseService.getAlias(api.getApiName()));
+            }
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("data", apiInfos);
+        ApiResult.writeToResponse(response, data);
+	}
+	
+	public void setAliase(HttpServletRequest request, HttpServletResponse response){
+	    KeyValue<String, String> aliasInfo = getObjFromRequest(KeyValue.class, request);
+	    aliaseService.update(aliasInfo);
+	}
+
+}

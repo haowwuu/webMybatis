@@ -1,0 +1,109 @@
+/*
+ * File Name: DataSourceFactory.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.ds;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import com.cetiti.dsp.dao.ResourceMapper;
+import com.cetiti.dsp.dao.SecurityMapper;
+import com.cetiti.dsp.util.SqlSessionFactoryWapper;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-22
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class DataSourceFactory {
+	
+	public static final String DSP_DS = "com/cetiti/dsp/ds/MapperConfig.xml";
+	public static final String DSP_DDL = "com/cetiti/dsp/ds/dsp-schema.sql";
+	public static final String DSP_DATA = "com/cetiti/dsp/ds/dsp-data.sql";
+	private static SqlSessionFactory sqlSessionFactory;
+	
+	private static void createSqlSessionFactory() {
+		try {
+			Reader reader = Resources.getResourceAsReader(DSP_DS);
+		    sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+		    sqlSessionFactory = new SqlSessionFactoryWapper(sqlSessionFactory);
+		    reader.close();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+
+	public static <T> T getMapper(Class<T> type) {
+		if(null==sqlSessionFactory){
+			createSqlSessionFactory();
+		}
+		
+		SqlSession session = sqlSessionFactory.openSession();
+		return session.getMapper(type);
+	}
+	
+	public static void createSchemaAndLoadData() throws IOException, SQLException{
+		if(null==sqlSessionFactory){
+			createSqlSessionFactory();
+		}
+		DataSource ds = sqlSessionFactory.getConfiguration().getEnvironment().getDataSource();
+		
+		runScript(ds, DSP_DDL);
+		runScript(ds, DSP_DATA);
+	}
+	
+	private static void runScript(DataSource ds, String resource) throws IOException, SQLException {
+		Connection connection = ds.getConnection();
+		try {
+			ScriptRunner runner = new ScriptRunner(connection);
+			runner.setAutoCommit(true);
+			runner.setStopOnError(false);
+			runner.setLogWriter(null);
+			runner.setErrorLogWriter(null);
+			runScript(runner, resource);
+		} finally {
+			connection.close();
+		}
+	}
+	
+	private static void runScript(ScriptRunner runner, String resource) throws IOException, SQLException {
+		Reader reader = Resources.getResourceAsReader(resource);
+		try {
+			runner.runScript(reader);
+		} finally {
+			reader.close();
+		}
+	}
+	
+	public static void main(String[] args) throws Exception{
+		//createSchemaAndLoadData();
+		ResourceMapper resourceMapper = getMapper(ResourceMapper.class);
+		SecurityMapper securityMapper = getMapper(SecurityMapper.class);
+		System.out.println(resourceMapper.select());
+		System.out.println(securityMapper.selectList());
+		System.out.println(securityMapper.selectMap());
+	}
+
+}

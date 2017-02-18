@@ -1,0 +1,123 @@
+/*
+ * File Name: MetadataPathRepos.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-9
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-9
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.io.FileUtils;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-9
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class MetadataPathRepos {
+	
+	private static final String PERSISTENT_FILE_NAME = "metadataPath.txt";
+	private static File PERSISTENT_FILE = new File(PERSISTENT_FILE_NAME);
+	private static Set<String> SAVED_PATHS = new HashSet<String>();
+	private static String ENCODING = "UTF-8";
+	
+	static{
+		URL url = MetadataPathRepos.class.getClassLoader().getResource(PERSISTENT_FILE_NAME);
+		try {
+			PERSISTENT_FILE = new File(url.toURI());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		
+		getSavedMetadataPath();
+	}
+	
+	public static void saveMetadataPath(String metadataPath){
+		if(SAVED_PATHS.contains(metadataPath)){
+			return;
+		}
+		List<String> lines = new ArrayList<String>();
+		lines.add(metadataPath);
+		try {
+			FileUtils.writeLines(PERSISTENT_FILE, ENCODING, lines, true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		SAVED_PATHS.add(metadataPath);
+	}
+	
+	public static List<String> getSavedMetadataPath(){
+		List<String> paths = new ArrayList<String>();
+		try {
+			paths = FileUtils.readLines(PERSISTENT_FILE, ENCODING);
+		} catch (FileNotFoundException e) {
+			try {
+				PERSISTENT_FILE.createNewFile();
+			} catch (Exception fnfe) {
+				throw new RuntimeException(fnfe);
+			}
+			return paths;
+		}catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		SAVED_PATHS.addAll(paths);
+		return paths;
+	}
+	
+	public static void deleteMetadataPath(String metadataPath){
+		SAVED_PATHS.remove(metadataPath);
+		try {
+			FileUtils.deleteQuietly(PERSISTENT_FILE);
+			FileUtils.writeLines(PERSISTENT_FILE, ENCODING, SAVED_PATHS, true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void clearMetadataPath(){
+		SAVED_PATHS.clear();
+		try {
+			FileUtils.deleteQuietly(PERSISTENT_FILE);
+			FileUtils.writeLines(PERSISTENT_FILE, ENCODING, SAVED_PATHS, true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void main(String[] args) {
+		saveMetadataPath("def");
+		saveMetadataPath("123");
+		saveMetadataPath("def");
+		saveMetadataPath("abc0");
+		
+		for(String p:getSavedMetadataPath()){
+			System.out.println(p);
+		}
+		System.out.println("delete");
+		deleteMetadataPath("123");
+		
+		for(String p:getSavedMetadataPath()){
+			System.out.println(p);
+		}
+	}
+}

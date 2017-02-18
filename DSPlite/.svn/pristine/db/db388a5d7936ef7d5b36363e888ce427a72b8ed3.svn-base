@@ -1,0 +1,38 @@
+/*
+ * File Name: DspMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Select;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-9-22
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public interface ResourceMapper {
+	
+	@Select("SELECT resource_url from service_resource")
+	List<String> select();
+	
+	int insert(String resource);
+	
+	int delete(String resource);
+
+}

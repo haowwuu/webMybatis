@@ -1,0 +1,13 @@
+@CHARSET "UTF-8";
+#serviceContentTable
+{
+    table-layout:fixed;
+    word-wrap:break-word;
+}
+#serviceContentTable th{
+	text-align:center;
+}
+.dataTables_length{
+	margin-top:10px;
+}
+

@@ -1,0 +1,110 @@
+/*
+ * File Name: flowInfo.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-21
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-21
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.model;
+
+import java.util.Date;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-21
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class flowInfo {
+	
+	private String flowId;
+	private String appKey;
+	private String apiMethod;
+	private int total;
+	private int used;
+	private Date creationDate;
+	
+	/**
+	 * @return the flowId
+	 */
+	public String getFlowId() {
+		return flowId;
+	}
+	/**
+	 * @param flowId the flowId to set
+	 */
+	public void setFlowId(String flowId) {
+		this.flowId = flowId;
+	}
+	/**
+	 * @return the appKey
+	 */
+	public String getAppKey() {
+		return appKey;
+	}
+	/**
+	 * @param appKey the appKey to set
+	 */
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+	/**
+	 * @return the apiMethod
+	 */
+	public String getApiMethod() {
+		return apiMethod;
+	}
+	/**
+	 * @param apiMethod the apiMethod to set
+	 */
+	public void setApiMethod(String apiMethod) {
+		this.apiMethod = apiMethod;
+	}
+	/**
+	 * @return the total
+	 */
+	public int getTotal() {
+		return total;
+	}
+	/**
+	 * @param total the total to set
+	 */
+	public void setTotal(int total) {
+		this.total = total;
+	}
+	/**
+	 * @return the used
+	 */
+	public int getUsed() {
+		return used;
+	}
+	/**
+	 * @param used the used to set
+	 */
+	public void setUsed(int used) {
+		this.used = used;
+	}
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+	
+	
+	
+}

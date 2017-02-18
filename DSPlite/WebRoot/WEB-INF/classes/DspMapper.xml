@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+       Copyright 2009-2012 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE service
+    PUBLIC "-//localhost//DTD Mapper 1.0//EN"
+    "http://localhost/dtd/mapper.dtd">
+    
+<service>   
+ 
+<dataCenter resource="DspConfig.xml" />
+
+<mapper namespace="com.cetiti.dsp.Mapper">
+
+  <select id="selectStrategys" resultType="map">
+    SELECT * from t_dsp_strategy
+  </select>
+  
+  <select id="selectLevelsWithParams" resultType="map" parameterType="map">
+    SELECT * from t_dsp_level
+    where levelid = #{levelid} or levelname = #{levelname}
+  </select>
+ 
+  <select id="selectErrorCodeWithDsql" resultType="map" parameterType="map">
+    SELECT * from t_dsp_errorcode ${sqlpop}
+  </select>
+  
+  <select id="selectTableWithDsql" resultType="map" parameterType="map">
+    SELECT * from ${sql}
+  </select>
+  
+  <select id="selectTablByPage" resultType="map" parameterType="map">
+    SELECT * from (SELECT A.*,ROWNUM RN FROM (SELECT * FROM #{tableName}) A WHERE ROWNUM &lt; #{toIndex}) where RN &gt;= #{fromIndex}
+  </select>
+  
+
+</mapper>
+
+</service>

@@ -1,0 +1,152 @@
+/*
+ * File Name: ServiceServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-26
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-26
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.io.File;
+import java.io.Reader;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetiti.dsp.builder.SqlSessionFactoryBuilder;
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.model.KeyValue;
+import com.cetiti.dsp.service.AliaseService;
+import com.cetiti.dsp.service.QuantityService;
+import com.cetiti.dsp.service.ResourcePathService;
+import com.cetiti.dsp.service.impl.AliaseServiceImpl;
+import com.cetiti.dsp.service.impl.QuantityServiceImpl;
+import com.cetiti.dsp.service.impl.ResourcePathServiceImpl;
+import com.cetiti.dsp.soap.ServicePublisher;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.Configration;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-8-26
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class ServiceServlet extends DispatcherServlet{
+	
+	private static final long serialVersionUID = 7934699425990017164L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceServlet.class);
+	private AliaseService aliaseService = new AliaseServiceImpl();
+	private QuantityService quantityService = new QuantityServiceImpl();
+	private ResourcePathService rpService = new ResourcePathServiceImpl();
+
+	public void content(HttpServletRequest request, HttpServletResponse response){
+        Collection<APIinfo> apiInfos = SqlSessionFactoryRepos.getApiInfos();
+        for(APIinfo api:apiInfos){
+            api.buildRestApiName(getBasePath(request));
+            api.buildSoapApiName();
+            if(null!=aliaseService.getAliase(api.getNameSpace())){
+                api.setNameSpace(aliaseService.getAliase(api.getNameSpace()));
+            }
+            if(null!=aliaseService.getAliase(api.getApiName())){
+                api.setSelectId(aliaseService.getAliase(api.getApiName()));
+            }
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("data", apiInfos);
+        ApiResult.writeToResponse(response, data);
+	}
+	
+	public void setAliase(HttpServletRequest request, HttpServletResponse response){
+	    KeyValue<String, String> aliase = new KeyValue<String, String>();
+	    aliase.setKey(request.getParameter("interfaceOriginal"));
+	    aliase.setValue(request.getParameter("interfaceAliase"));
+	    int result = aliaseService.setAliase(aliase);
+	   
+	    aliase.setKey(request.getParameter("nameSpaceOriginal"));
+	    aliase.setValue(request.getParameter("nameSpaceAliase"));
+        result = aliaseService.setAliase(aliase);
+     
+        ApiResult.writeToResponse(response, result);
+	}
+	
+	public void myService(HttpServletRequest request, HttpServletResponse response){
+		HttpSession session = request.getSession();
+		if(null==session){
+			return;
+		}
+		String account = (String)session.getAttribute("account");
+		if(null==account){
+			return;
+		}
+		if(Configration.INSTANCE.isAdmin(account)){
+			content(request, response);
+			return;
+		}
+		
+		APIinfo.setBaseRestPath(getBasePath(request));
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("data", quantityService.queryQuantityAndServiceByAppName(account));
+		
+		ApiResult.writeToResponse(response, data);
+	}
+	
+	public void publish(HttpServletRequest request, HttpServletResponse response){
+		ApiResult result = ApiResult.getDefaultActionResult();
+		String metaDataPath = request.getParameter("metaDataPath");
+		if(null==metaDataPath||metaDataPath.indexOf(".xml")<0){
+			result.setResultcode(ApiResult.CODE.RET_NO);
+			result.setMsg("metaDataPath ["+metaDataPath+"] isn't xml resource.");
+			result.writeToResponse(response);
+			return;
+		}
+		
+		try {
+			if(metaDataPath.indexOf("://")<0&&metaDataPath.indexOf("file:")<0){
+				File file = new File(metaDataPath);
+				if(file.exists()){
+					metaDataPath = file.toURI().toURL().toString();					
+				}else{
+					URL url = Resources.getResourceURL(metaDataPath);
+					metaDataPath = url.toString();
+				}
+			}
+			Reader configReader = Resources.getUrlAsReader(metaDataPath);
+			SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configReader);
+			SqlSessionFactoryRepos.addSqlSessionFactory(sqlSessionFactory, metaDataPath);
+			
+			ServicePublisher.publish(SqlSessionFactoryRepos.getApiInfos());
+			
+		    configReader.close();
+		    //MetadataPathRepos.saveMetadataPath(metaDataPath);
+		    rpService.save(metaDataPath);
+		    result.setMsg("success");
+		} catch (Exception e) {
+			LOGGER.error("metaDataPath:[{}] publish: [{}]", metaDataPath, e.getMessage());
+			result.setResultcode(ApiResult.CODE.RET_NO);
+			result.setMsg(e.getMessage());
+		}
+		
+		result.writeToResponse(response);
+	}
+	
+}

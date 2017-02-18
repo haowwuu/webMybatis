@@ -1,0 +1,71 @@
+/*
+ * File Name: APIDetailServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-26
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-26
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.util.ApiResultFormater;
+import com.cetiti.dsp.util.ApiResultFormaterFactory;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-8-26
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class APIDetailServlet extends HttpServlet{
+	
+	private static final long serialVersionUID = 7934699425990017164L;
+
+	@Override
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException,IOException{
+		ApiResultFormater formater = ApiResultFormaterFactory.getApiResultFormater("json");
+		
+		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+
+				request.getContextPath()+APIServlet.API_PATH;
+		Collection<APIinfo> apiInfos = SqlSessionFactoryRepos.getApiInfos();
+        for(APIinfo apIinfo:apiInfos){
+        	String apiName = apIinfo.getApiName();
+        	if(apiName.indexOf(basePath)>=0)
+        		continue;
+        	apIinfo.setApiName(basePath+apiName);
+        }
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("data", apiInfos);
+        String contents = formater.format(data);
+		ServletOutputStream out = response.getOutputStream();
+		out.print(contents);
+		out.close();
+	}
+	
+	@Override	    
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException, IOException{
+        doGet(request, response);
+    }	
+}

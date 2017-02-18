@@ -1,0 +1,87 @@
+/*
+ * File Name: AuditTrailServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-25
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-25
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.Queue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetiti.dsp.dao.AuditTrailMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.AuditTrail;
+import com.cetiti.dsp.service.AuditTrailService;
+import com.cetiti.dsp.util.SequenceGenerator;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-25
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AuditTrailServiceImpl implements AuditTrailService{
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(AuditTrailServiceImpl.class);
+	private final static int Q_SIZE = 1024;
+	private static Queue<AuditTrail> logQ;
+	private static ScheduledExecutorService ses;
+	private AuditTrailMapper atMapper = DataSourceFactory.getMapper(AuditTrailMapper.class);
+	
+	public AuditTrailServiceImpl() {
+		if(null==ses){
+			logQ = new LinkedBlockingQueue<AuditTrail>(Q_SIZE);
+			ses = Executors.newSingleThreadScheduledExecutor();
+			ses.scheduleAtFixedRate(logTask, 30, 30, TimeUnit.SECONDS);
+		}
+	}
+	
+	private Runnable logTask = new Runnable() {
+		@Override
+		public void run() {
+			AuditTrail auditTrail = null;
+			try {
+				while (logQ.size() > 0) {
+					auditTrail = logQ.poll();
+					auditTrail.setAuditId(SequenceGenerator.next());
+					atMapper.insert(auditTrail);
+				}
+			} catch (Exception e) {
+				LOGGER.error("error log:[{}], message:[{}],[{}]",
+						auditTrail.toString(), e.getMessage(), e.getCause());
+			}
+		}
+	};
+	
+	public final static void stopLogService() {
+		if(null!=ses){
+			ses.shutdown();
+			ses = null;
+		}
+	}
+	
+	@Override
+	public int trail(AuditTrail auditTrail) {
+		if(null==auditTrail){
+			return 0;
+		}
+		
+		return logQ.offer(auditTrail)?1:0;
+	}
+}

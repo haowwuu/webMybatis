@@ -1,0 +1,50 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+
+<style type="text/css">
+.title{
+	font-size: 24px;
+}
+#navItem{
+	float:right;
+	margin-right:0;
+}
+.container-fluid{
+	max-width:1024px;
+	margin：0 auto;
+	padding-left:15px;
+	padding-right:15px;
+}
+
+</style>
+
+<div class="container">
+	<div id="confirmModal" class="modal fade in" style="z-index:80;">
+ 		<div class="modal-dialog modal-content" style="margin-top:12%; width:400px;">
+	  		<div class="modal-header" style="background-color: #428bca; padding: 3px 10px;" ><strong>确定删除数据?</strong></div>
+	  		<div class="modal-body container-fluid">
+	  			<p class="confirm-content"></p>
+	  		</div>
+	  		<div class="modal-footer" style="padding:5px 15px;">
+	  			<button name="submit" class="btn btn-primary">确认</button>
+	  			<button class="btn btn-default" data-dismiss="modal">取消</button>
+	  		</div>
+  		</div>
+	</div>
+</div>
+
+<header>
+	<nav class="navbar navbar-inverse" >
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a class="navbar-brand title" href="<%=basePath%>"><strong>数据共享平台</strong></a>
+			</div>
+			<div id="navItem">
+				<ul class="nav navbar-nav">
+					<li name=docs><a href="<%=basePath%>service_accordion.jsp">DOCS</a></li>
+					<li name=keys><a href="<%=basePath%>application.jsp">KEYS</a></li>
+					<li><a href="">QUESTIONS</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>

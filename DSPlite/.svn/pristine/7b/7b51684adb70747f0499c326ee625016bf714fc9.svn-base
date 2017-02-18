@@ -1,0 +1,45 @@
+/*
+ * File Name: SoapMessageFilterTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-28
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-28
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-28
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class SoapMessageFilterTest {
+
+	/**
+	 * 〈一句话功能简述〉
+	 * 
+	 * @throws java.lang.Exception
+	 */
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@Test
+	public void test() {
+		fail("Not yet implemented");
+	}
+
+}

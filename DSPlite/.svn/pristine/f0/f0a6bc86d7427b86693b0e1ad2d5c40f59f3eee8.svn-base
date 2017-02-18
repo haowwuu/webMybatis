@@ -1,0 +1,42 @@
+/*
+ * File Name: AuditTrailServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-25
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-25
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import com.cetiti.dsp.dao.AuditTrailMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.AuditTrail;
+import com.cetiti.dsp.service.AuditTrailService;
+import com.cetiti.dsp.util.SequenceGenerator;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-25
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AuditTrailServiceImpl implements AuditTrailService{
+	
+	private AuditTrailMapper atMapper = DataSourceFactory.getMapper(AuditTrailMapper.class);
+
+	@Override
+	public int trail(AuditTrail auditTrail) {
+		if(null==auditTrail){
+			return 0;
+		}
+		auditTrail.setAuditId(SequenceGenerator.next());
+		return atMapper.insert(auditTrail);
+	}
+}

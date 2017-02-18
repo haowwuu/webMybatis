@@ -1,0 +1,112 @@
+/*
+ * File Name: APISecurity.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-9-22
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-9-22
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.model;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-9-22
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class APISecurity {
+	
+	private String appKey;
+	private String appSecret;
+	private String sign;
+	private String appAddress;
+	
+	public APISecurity() {
+		
+	}
+	
+	
+	/**
+	 * @param appKey
+	 * @param appSecret
+	 * @param sign
+	 * @param appAddress
+	 */
+	public APISecurity(String appKey, String appSecret, String sign, String appAddress) {
+		this.appKey = appKey;
+		this.appSecret = appSecret;
+		this.sign = sign;
+		this.appAddress = appAddress;
+	}
+
+
+	/**
+	 * @return the appKey
+	 */
+	public String getAppKey() {
+		return appKey;
+	}
+	/**
+	 * @param appKey the appKey to set
+	 */
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+	/**
+	 * @return the appSecret
+	 */
+	public String getAppSecret() {
+		return appSecret;
+	}
+	/**
+	 * @param appSecret the appSecret to set
+	 */
+	public void setAppSecret(String appSecret) {
+		this.appSecret = appSecret;
+	}
+	/**
+	 * @return the sign
+	 */
+	public String getSign() {
+		return sign;
+	}
+	/**
+	 * @param sign the sign to set
+	 */
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+	/**
+	 * @return the appAddress
+	 */
+	public String getAppAddress() {
+		return appAddress;
+	}
+	/**
+	 * @param appAddress the appAddress to set
+	 */
+	public void setAppAddress(String appAddress) {
+		this.appAddress = appAddress;
+	}
+	/**
+	 * 〈一句话功能简述〉
+	 * 
+	 * @see java.lang.Object#toString()
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		return "APISecurity [appKey=" + appKey + ", appSecret=" + appSecret
+				+ ", sign=" + sign + ", appAddress=" + appAddress + "]";
+	}
+	
+	
+	
+}

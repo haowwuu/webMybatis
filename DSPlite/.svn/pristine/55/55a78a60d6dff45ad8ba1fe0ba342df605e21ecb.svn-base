@@ -1,0 +1,151 @@
+/*
+ * File Name: IpPortUtil.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.util.Enumeration;
+
+import javax.jws.WebService;
+import javax.xml.ws.Endpoint;
+
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-8-31
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class IpPortUtil {
+	
+	public static final String SERVER_IP = serverIp();
+	private static String SOAP_SERVER = null;
+	
+	public static String getSoapServer(){
+		return SOAP_SERVER;
+	}
+	
+	public static String createSoapServer(){
+		int port = 8081;
+		if(null!=Configration.INSTANCE.getSoapPort()){
+			port = Configration.INSTANCE.getSoapPort();
+		}
+		port = getAvailableEndpointPort(port);
+		String server = SERVER_IP;
+		if(null!=Configration.INSTANCE.getServerAddress()){
+			server = Configration.INSTANCE.getServerAddress();
+		}
+		
+		SOAP_SERVER = "http://"+server+":"+port+"/";
+		return SOAP_SERVER;
+	}
+			
+	private static String serverIp(){
+		String localip = null;
+		String netip = null;
+		try {
+			Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
+			InetAddress ip = null;
+			boolean finded = false;
+			while (netInterfaces.hasMoreElements() && !finded) {
+				NetworkInterface ni = netInterfaces.nextElement();
+				Enumeration<InetAddress> address = ni.getInetAddresses();
+				while (address.hasMoreElements()) {
+					ip = address.nextElement();
+					if (!ip.isSiteLocalAddress() && !ip.isLoopbackAddress()
+							&& ip.getHostAddress().indexOf(":") == -1) {
+						netip = ip.getHostAddress();
+						finded = true;
+						break;
+					} else if (ip.isSiteLocalAddress()&& !ip.isLoopbackAddress()
+							&& ip.getHostAddress().indexOf(":") == -1) {
+						localip = ip.getHostAddress();
+					}
+				}
+			}
+		} catch (SocketException e) {
+			throw new RuntimeException(e);
+		}
+		if (netip != null && !"".equals(netip)) {
+			return netip;
+		} else {
+			return localip;
+		}
+	}
+		
+	public static Integer getAvailablePort(int port){
+		ServerSocket socket = null;
+		for(int i=0; i<2048; i++){
+			try {
+				socket = new ServerSocket(port+i);
+			} catch (Exception e) { 
+				
+			} finally{
+				if(null!=socket){
+					try {
+						socket.close();
+						return port+i;
+					} catch (Exception e2) {
+						
+					}
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	public static Integer getAvailableEndpointPort(int port){
+		Endpoint endpoint = null;
+		for(int i=0; i<2048; i++){
+			try {
+				endpoint = Endpoint.publish("http://"+SERVER_IP+":"+(port+i)+"/test", new Test());
+			} catch (Exception e) { 
+				if(port<8080){
+					port = 8080;
+				}
+			} finally{
+				if(null!=endpoint){
+					endpoint.stop();
+					return port+i;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	@WebService
+    public static class Test{
+		public void test(){
+			
+		}
+	}
+	
+	public static void main(String[] args) throws Exception{
+		 /*InetAddress address = InetAddress.getByName("10.70.7.71");
+		 System.out.println(address.isReachable(10000));*/
+		 
+		 //Endpoint endpoint = Endpoint.publish("http://10.0.10.48:8081/test", new Test());
+		 Endpoint endpoint = Endpoint.publish("http://x.chen.lv:8081/test", new Test());
+		 endpoint.stop();
+		 System.out.println("finished");
+	}
+	
+}

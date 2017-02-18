@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+       Copyright 2009-2012 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE service
+    PUBLIC "-//localhost//DTD Mapper 1.0//EN"
+    "http://localhost/dtd/mapper.dtd">
+    
+<service>   
+ 
+<dataCenter resource="DspConfig.xml" />
+
+<mapper namespace="com.cetiti.test.Mapper">
+
+  
+  <select id="selectLevels" resultType="map" >
+    SELECT ENT_NAME as name, ORG_CODE as code, LEGAL_MAN as legalRepresentative, ADDRESS as address, (select t.NAME from GOVERNMENT_AREA t where t.CODE = AREA_CODE) as regionName, LONGITUDE as longitude, LATITUDE as latitude, (select ip.NAME from INDUSTRIAL_PARK ip where ip.CODE = INDUSTRIAL_PARK) as industrialParkName, (select dic.name from DICTIONARY dic where dic.ID = TRADE_CODE and dic.TYPE_ID = 'EPDC.TRADE') as industrialCategoryName, TEL_CODE as areaCode, TEL as contactTel, DUTY_TEL as dutyTel, FAX as faxNumber, ENV_MANAGER as envManager, EVN_MANAGER_TEL as envManagerTel, ANNUAL_PRODUCTHOUR as annualProductHour, GROSS_INDUSTRIAL_PRODUCT as grossIndustrialProduct, COVER_AREA as area, (select dic2.NAME from DICTIONARY dic2 where dic2.ID = ENT_STATUE and dic2.TYPE_ID = 'EPDC.ENT_STATUE') as statusName, (select dic1.NAME from DICTIONARY dic1 where dic1.ID = SCALE_TYPE and dic1.TYPE_ID = 'EPDC.SCALE') as scaleName, UPDATE_TIME as updateTime FROM ENTERPRISE e
+  </select>
+ 
+</mapper>
+
+</service>

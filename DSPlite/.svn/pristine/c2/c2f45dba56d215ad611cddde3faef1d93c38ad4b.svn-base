@@ -1,0 +1,106 @@
+/*
+ * File Name: QuantityMapper.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-21
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-21
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.type.JdbcType;
+
+import com.cetiti.dsp.model.QuantityInfo;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-21
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public interface QuantityMapper {
+	
+	@Insert("insert into quantity_info (quantity_id, app_key, api_method, total, used, creation_date) " +
+			"values (#{quantityId}, #{appKey}, #{apiMethod}, #{total}, #{used}, #{creationDate})")
+	int insert(QuantityInfo quantityInfo);
+	
+	@Update("update quantity_info set app_key = #{appKey}, " +
+			"api_method = #{apiMethod}, " +
+			"total = #{total}, " +
+			"used = #{used} " +
+		"where quantity_id = #{quantityId}")
+	int update(QuantityInfo quantityInfo);
+	
+	@Update("update quantity_info set used = 0")
+	int clearUsed();
+	
+	@Select("select quantity_id, q.app_key, api_method, total, used, creation_date, app_name " +
+			"from quantity_info q left join app_info a on q.app_key=a.app_key")
+	@Results({ 
+		@Result(property = "quantityId", column = "quantity_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "apiMethod", column = "api_method"),
+		@Result(property = "total", column = "total"),
+	    @Result(property = "used", column = "used"),
+		@Result(property = "creationDate", column = "creation_date"),
+		@Result(property = "appName", column = "app_name")
+	})
+	List<QuantityInfo> selectList();
+	
+	@Select("select quantity_id, q.app_key, api_method, total, used, creation_date, app_name " +
+			"from quantity_info q left join app_info a on q.app_key=a.app_key where app_name = #{appName}")
+	@Results({ 
+		@Result(property = "quantityId", column = "quantity_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "apiMethod", column = "api_method"),
+		@Result(property = "total", column = "total"),
+	    @Result(property = "used", column = "used"),
+		@Result(property = "creationDate", column = "creation_date"),
+		@Result(property = "appName", column = "app_name")
+	})
+	List<QuantityInfo> selectListByApp(String appName);
+	
+	@Select("select * from quantity_info where app_key = #{0} and api_method = #{1}")
+	@Results({ 
+		@Result(property = "quantityId", column = "quantity_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "apiMethod", column = "api_method"),
+		@Result(property = "total", column = "total"),
+	    @Result(property = "used", column = "used"),
+		@Result(property = "creationDate", column = "creation_date")
+	})
+	QuantityInfo selectByKeyAndMethod(String appkey, String method);
+	
+	@Select("select * from quantity_info where quantity_id = #{quantityId}")
+	@Results({ 
+		@Result(property = "quantityId", column = "quantity_id"), 
+	    @Result(property = "appKey", column = "app_key"), 
+	    @Result(property = "apiMethod", column = "api_method"),
+		@Result(property = "total", column = "total"),
+	    @Result(property = "used", column = "used"),
+		@Result(property = "creationDate", column = "creation_date")
+	})
+	QuantityInfo select(String quantityId);
+	
+	@Delete("delete from quantity_info where quantity_id = #{quantityId}")
+	int delete(String quantityId);
+	
+	@Delete("delete from quantity_info where app_key = #{appKey}")
+	int deleteByAppKey(String appKey);
+	
+}

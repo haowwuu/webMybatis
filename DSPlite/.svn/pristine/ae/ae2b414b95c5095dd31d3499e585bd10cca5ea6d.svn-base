@@ -1,0 +1,445 @@
+<!doctype html>
+<html>
+  <head>
+    <title>service contents</title>
+    <meta charset="utf-8">
+    <meta http-equiv="keywords" content="dsp,contents,service">
+    <meta http-equiv="description" content="dsp main page">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="resources/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="resources/css/dataTables.bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="resources/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="resources/css/dsp.css" />
+    <link rel="stylesheet" type="text/css" href="resources/css/serviceTab.css" />
+
+    <script type="text/javascript" src="js/jquery-1.12.3.js"></script>
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/include.js"></script>
+    <script type="text/javascript" src="js/jquery.md5.js"></script>
+    <script type="text/javascript" src="js/dsp.js"></script>
+  </head>
+  <body>
+    <include src="include/header.html"></include>
+    <!--实现接口文档页面的布局 -->
+    <div id="contents" class="container-fluid">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="input-group" class="col-md-5">
+            <span class="input-group-addon">搜索</span> 
+            <input id="searchInput" type="text" class="form-control" placeholder="查询接口">
+          </div>
+        </div>
+      </div>
+
+      <!-- print interface information -->
+      <div id="hero-slider" class="row">
+        <div id="tabLeft" class="col-md-3"></div>
+        <div class="mask" class="col-md-8">
+          <div class="slider-body" id="interfaceInformation"></div>
+        </div>
+        <!-- .mask -->
+        <div class="clear" class="col-md-1"></div>
+        <!-- #hero-slider -->
+    
+      <!--  实现签名算法功能模块的布局 -->
+      <div id=sigAlgPanel>
+      <!--签名算法介绍： -->
+      <h1 class="main_hd" align = "center" style="font-family: 微软雅黑, 'Microsoft YaHei';">DSP签名算法</h1>
+      <div class="news_content">
+          <p>
+            <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+            DSP采用MD5签名算法来检验用户或管理员的合法性，关键是根据多个参数来生成sign。下面通过一个具体实例来说明。</span>
+          </p>
+          <p>
+            <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+                                  假定用户需要查询com.cetiti.dsp.Mapper下的testSelectLevelsWithParams接口。其步骤如下：</span>
+          </p>
+          <table class="table" width="951">
+            <tbody class="tbody">
+              <tr class="firstRow thead">
+                <td class="table_cell" width="651" valign="top" style="word-break: break-all;">
+                  <p style="white-space: normal;">
+                    <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+                                                        用户分配得到应用标识appKey(=6f420cf8ee7541ed217580f918366072)和应用密钥appSecret(=c4bf7c4d1fbc3837d9f7649179f04a60)。</span>
+                  </p>
+		          <p style="white-space: normal;">
+		           <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+		                                  查询接口文档后，发现该接口需要参数levelid(=3),levelname(=level5)。</span>
+		          </p>
+		          <p style="white-space: normal;">
+		           <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+		                                  额外的参数插入HashMap中，接着传入用于生成关键默认参数之一(sign)的setSignature()函数中。<br>
+		                                  该函数首先在传入的HashMap中添加appKey和时间戳timestamp两个参数，然后将HashMap转换为TreeMap，接着对所有参数进行排序。<br>
+		                                  排序结果记为:<br>[appKey=6f420cf8ee7541ed217580f918366072,levelid=3,levelname=level5,timestamp=1479805063501] </span>
+		          </p>
+		          <p style="white-space: normal;">
+		           <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+		                                   在上述排序后的键值对头尾加入appSecret的值，得到<br>
+		           c4bf7c4d1fbc3837d9f7649179f04a60appKey6f420cf8ee7541ed217580f918366072levelid3levelnamelevel5timestamp1479805063501c4bf7c4d1fbc3837d9f7649179f04a60</span>
+		          </p>
+		          <p style="white-space: normal;">
+		           <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+		                                  该值通过MD5加密算法后，得到<br>
+		           sign=d93620bb45e4bc5f2527e9d70e036ad7.</span>
+		          </p>
+		          <p style="white-space: normal;">
+		           <span style="font-family: 微软雅黑, 'Microsoft YaHei';">
+		                                  每次查询接口，后台会根据该算法进行sign的验证，若是有参数出现问题，就不能访问接口。</span>
+		          </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+      <!--  实现接口测试的沙盒功能模块布局 -->
+      <div id=sandboxPanel >
+        <div id="description" class="des">沙盒功能供用户测试接口是否能正常访问，以及接口参数是否正确</div>
+        
+        <ol id="manual" class="manual">
+          <li><b>使用说明：</b></li>
+          <li>（1）选择命名空间</li>
+          <li>（2）选择上述命名空间下的接口，每个接口对应的格外参数也会一并显示（红色星号表示该字段必填）</li>
+          <li>（3）点击访问按钮，即可得到相应的调试信息。</li>
+        </ol>
+  
+        <div id="content" class="content">
+          <div id="typeSelectorDiv" class="frm_control_group">
+            <label class="frm_label">一、命名空间：</label>
+            <div class="frm_controls">
+              <select id="typeSelector" class="frm_input_box" onchange="showInterfaces()"></select>
+            </div>
+          </div>
+          <div id="formSelectorDiv" class="frm_control_group">
+            <label class="frm_label">二、接口列表：</label>
+            <div class="frm_controls">
+              <select id="formSelector" class="frm_input_box" onchange="showArguments()"></select> 
+              <span id="methodType" class="frm_tips">方法：POST</span>
+            </div>
+          </div>
+          <div id="formContent" class="frm_control_group">
+          <label>三、所有参数列表：</label> <br> <br>
+          <div id="formContainer">
+            <form target="result-iframe" form-type="args">
+              <div class="inputDiv">
+                <span class="red">*</span>
+                <span class="name">appKey</span>
+                <input type="text" id=appKeyID data-type="string" required="true" sync="true">
+                <span class="tips">请填写appKey</span>
+                <br>
+              </div>
+        
+              <div class="inputDiv">
+                <span class="red">*</span>
+                <span class="name">appSecret</span>
+                <input type="text" id=appSecretID data-type="string" required="true" sync="true">
+                <span class="tips">请填写appSecret</span>
+                <br>
+              </div>
+        
+              <div class="inputDiv" id=Arg1>
+                <span class="red">*</span>
+                <span class="name">levelid</span>
+                <input type="text" data-type="string" required="true" sync="true">
+                <span class="tips">请填写levelid</span>
+                <br>
+              </div>
+        
+              <div class="inputDiv" id=Arg2>
+                <span class="red">*</span>
+                <span class="name">levelName</span>
+                <input type="text" data-type="string" required="true" sync="true">
+                <span class="tips">请填写levelName</span>
+                <br>
+              </div>
+        
+              <input type="button" id="submit" value="访问接口">
+            </form>
+            <div id = returnTitle>以下为返回信息：</div>
+            <div id=ReturnMessages></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <include src="include/footer.html"></include>
+
+    <script type="text/javascript">
+      "use strict";
+
+      function showInterfaces() {
+        var nameSpace = $("#typeSelector").val();
+        //Chrome
+//      $("#formSelector > option").hide();
+//      $("[class$=\'" + nameSpace + "\']").show();
+        //IE
+        for (var i = 0; i < $("input[type=\"text\"]").length; i++) {
+          $("input[type=\"text\"]")[i].value="";
+          console.log($("input[type=\"text\"]")[i].value);
+        }
+        var spareData = tempData;
+        var selectedOption = new String("");
+        $("#formSelector")[0].innerHTML="";
+        for (var i = 0; i < spareData.data.length; i++) {
+          if(spareData.data[i].nameSpace==$("#typeSelector").val()){
+            selectedOption += "<option class="+nameSpace+">"+spareData.data[i].selectId+"</option>";
+          }
+        }
+        $("#formSelector").append(selectedOption);
+        
+      }
+
+      function showArguments() {
+        var nameSpace = $("#typeSelector").val();
+        var interfaceName = $("#formSelector").val();
+        for (var i = 0; i < $("input[type=\"text\"]").length; i++) {
+          $("input[type=\"text\"]")[i].value="";
+          console.log($("input[type=\"text\"]")[i].value);
+        }
+        $("#Arg1").hide();
+        $("#Arg2").hide();
+        //打印对应接口所需的额外参数
+        for (var i = 0; i < $("td").length; i++) {
+          if ($("td")[i].className == nameSpace + "/" + interfaceName) { 
+            var argumentArray = $("td")[i].innerHTML.split(",");
+            for (var w = 0; (w < argumentArray.length)&& (argumentArray != ""); w++) {
+              if (w == 0) {
+                $("#Arg1 > span.tips")[0].innerHTML = "请填写"+argumentArray[0];
+                $("#Arg1 > span.name")[0].innerHTML = argumentArray[0];
+                $("#Arg1").show();
+                } else {
+                $("#Arg2 > span.tips")[0].innerHTML = "请填写"+argumentArray[1];
+                $("#Arg2 > span.name")[0].innerHTML = argumentArray[1];
+                $("#Arg2").show();
+              }
+            }
+          }
+        }
+      }
+
+      function showpanel(bigPanelName) {
+        switch (bigPanelName.innerHTML) {
+          case "沙盒功能":
+          $("#sandboxPanel").show();
+          $("#sigAlgPanel").hide();
+          break;
+          case "签名算法":
+          $("#sigAlgPanel").show();
+          $("#sandboxPanel").hide();
+          break;
+          default:
+          $("#sigAlgPanel").hide();
+          $("#sandboxPanel").hide();
+        }
+      }
+
+      $(function() {
+        $("#submit").click(function() {
+        Sandbox.generateSign();
+        //return false;(form auto return)
+        });
+        //初始化
+        $("#Arg1").css("display", "none");
+        $("#Arg2").css("display", "none");
+
+        $("#navItem li[name='docs']").addClass('active');
+        Service.show();
+        // Event listener to the two range filtering inputs to redraw on input
+        $("#searchInput").keyup(
+          function() {
+            var flag = true;
+            var search = $("#searchInput").val();
+            var serviceData = $.extend(true, {}, tempData);
+            if (search.trim() == "") {
+              $("#hero-slider > div.mask").scrollTop(0);
+            }
+            //Reload the category
+            for (var i = 1; i < serviceData.data.length + 1; i++) {
+              $("#panel-" + i + "> h2").css({
+              "color" : "#000000",
+              "background-color" : "#F8F8F8",
+              "font-size" : "32px",
+              });
+            }
+
+            for (var i = 1; i < serviceData.data.length + 1; i++) {
+              if (((serviceData.data[i - 1].restApiName.indexOf(search) >= 0)
+                || (serviceData.data[i - 1].soapApiName.indexOf(search) >= 0)
+                || (serviceData.data[i - 1].parameters.indexOf(search) >= 0) 
+                || (serviceData.data[i - 1].sqlType.indexOf(search) >= 0))
+                && (search.trim() != "")) {
+                //locate and highlight
+                if ($("#panel-" + i + "> h2").scrollTop() != null) {
+                  if (flag == true) {
+                    $("#hero-slider > div.mask").scrollTop((i - 1)* $( "#panel-"+ i).height()+ 30);
+                    flag = false;
+                  }
+                  $("#panel-" + i + "> h2").css({
+                    "background-color" : "#98bf21",
+                    "font-size" : "20px",
+                  });
+                }
+              }
+            }
+        });
+      });
+
+      var tempData;
+      var Service = {
+        show : function() {
+          var map = {};
+          var mySet = {};
+          var input = $("#serviceForm input[name='metaDataPath']");
+          var v = input.val();
+          $.post("content",{ metaDataPath : v},function(data) {
+            var indexOfNameSpace = 0;
+            //object clone
+            tempData = $.extend(true, {}, data);
+            //HTML  begin
+            for (var i = 1; i < data.data.length + 1; i++) {
+              //Set
+              if (!mySet.hasOwnProperty(data.data[i - 1].nameSpace)) {
+                mySet[data.data[i - 1].nameSpace] = data.data[i - 1].nameSpace;
+              }
+            }
+            //打印所有的collapse.
+            for (var item in mySet) {
+              indexOfNameSpace++;
+              var text2 = "<ul><h4><a data-toggle=\"collapse\" data-parent=\"#accordion\" class=\"collapsed\" onclick=\"showpanel(this)\" href=\"#collapse"
+                  + indexOfNameSpace+ "\"><span class=\"portal_arrow\"></span>"+ item+ "</a></h4>"
+                  + "<div id=\"collapse"+indexOfNameSpace + "\" class=\"panel-collapse collapse \"></div>";
+              $(text2).appendTo("#tabLeft");
+              //加入包的下拉菜单
+              var test5 = "<option >" + item+ "</option>";
+              $(test5).appendTo("#typeSelector");
+              //Map
+              map[item] = indexOfNameSpace;
+            }
+            $("#collapse1").toggleClass("in");
+            $("#tabLeft > ul:nth-child(1) > h4 > a").toggleClass("collapsed");
+            //加入签名算法文档和接口测试按钮
+            console.log(indexOfNameSpace);
+            var text3 = "<ul><h4><a data-toggle=\"collapse\" data-parent=\"#accordion\" class=\"collapsed\" onclick=\"showpanel(this)\" href=\"#collapse"
+              + (++indexOfNameSpace)+ "\">签名算法</a></h4>"+ "<div id=\"collapse"+indexOfNameSpace + "\" class=\"panel-collapse collapse \"></div>";
+            console.log(indexOfNameSpace);
+            var text4 = "<ul><h4><a data-toggle=\"collapse\" data-parent=\"#accordion\" class=\"collapsed\" onclick=\"showpanel(this)\" href=\"#collapse"
+              + (++indexOfNameSpace)+ "\">沙盒功能</a></h4>"+ "<div id=\"collapse"+indexOfNameSpace+ "\" class=\"panel-collapse collapse \"></div>";
+            console.log(indexOfNameSpace);
+            $(text3).appendTo("#tabLeft");
+            $(text4).appendTo("#tabLeft");
+            
+              //将接口分类收入相应的命名空间
+            var flag = true;
+            for (var i = 1; i < data.data.length + 1; i++) {
+              if (i == 1) {
+                var txt1 = "<li><a href=\"service_accordion.html#panel-&num&\" id=\"interface&num&\"class=\"active\" >&selectId&</a></li>";
+                var text1 = txt1.replace(/&num&/g,i.toString()).replace(/&selectId&/g,data.data[0].selectId);
+                $(text1).appendTo("#collapse" + 1);
+                //打印下划菜单的第一个接口
+                var txt7 = "<option class=\"&namspace&\">&selectId&</option>";
+                var text7 = txt7.replace(/&selectId&/g,data.data[0].selectId).replace(/&namspace&/g,data.data[0].nameSpace);
+                $(text7).appendTo("#formSelector");
+              } else {
+                for ( var item in mySet) {
+                  if(flag){
+                    var lastItem = item;
+                    flag = false;
+                  }
+                  if (item == data.data[i - 1].nameSpace) {
+                    txt1 = "<li><a href=\"service_accordion.html#panel-&num&\" id=\"interface&num&\" >&selectId&</a></li>";
+                    var text1 = txt1.replace(/&num&/g,i.toString()).replace(/&selectId&/g,data.data[i - 1].selectId);
+                    $(text1).appendTo("#collapse"+ map[item]);
+                    //打印下划菜单的剩下接口
+                    if(lastItem == item){
+                      var txt6 = "<option class=\"&namspace&\">&selectId&</option>";
+                      var text6 = txt6.replace(/&selectId&/g,data.data[i - 1].selectId).replace(/&namspace&/g,item);
+                      $(text6).appendTo("#formSelector");
+                    }
+                  }
+                }
+              }
+              $("[class$=\'"+ $("#typeSelector").val()+ "\']").show();
+              // right portion of the Vertical tab
+              //template
+              var t1 = "<div class=\"panel\" id=\"panel-num\">"+ "<h2>&selectId&</h2>";
+              var t2 = "<table class=\"table table-striped\"><thead><tr> <th>参数名称</th><th>参数值</th></tr> </thead>"
+                + "<tbody> <tr><td>REST接口地址</td><td>&restApiName&</td></tr>";
+              var t3 = "<tr><td>SOAP接口地址</td><td><a href= &soapApiName& target=\"_blank\">&soapApiName&</a></td></tr>";
+              var t4 = "<tr><td>参数</td><td class=\"&ApiName&\">&outputParamters&</td></tr>";
+              var t5 = "<tr><td>类型</td><td>&type&</td></tr> </div>";
+              var template = t1 + t2 + t3 + t4 + t5;
+              var tr = template.replace(/num/g, i.toString())
+                .replace(/&ApiName&/g,data.data[i - 1].apiName)
+                .replace(/&restApiName&/g,data.data[i - 1].restApiName)
+                .replace(/&soapApiName&/g,data.data[i - 1].soapApiName)
+                .replace("&outputParamters&",data.data[i - 1].parameters)
+                .replace("&type&",data.data[i - 1].sqlType)
+                .replace(/&selectId&/g,data.data[i - 1].selectId);
+              $(tr).appendTo("#interfaceInformation");
+              // the end
+            }
+          }, "json");
+        }
+      }
+
+      $(document).ready(function() {
+        $("#hero-slider > div.mask").scroll(function() {
+        var panels = $("#interfaceInformation").find(".panel");
+        var menu = $("#tabLeft ul ");
+        var currentId = "";
+        panels.each(function() {
+          var m = $(this);
+          if (m.offset().top < m.height() - 10) {
+            currentId = m.attr("id");
+          } else {
+            return false;
+          }
+        });
+  
+        var currentLink = menu.find(".active");
+        if (currentId && currentLink.attr("href") != currentId) {
+          currentLink.removeClass("active");
+          $("#interface" + currentId.substring(6, 8)).addClass("active");
+        }
+        });
+      });
+
+      var Sandbox = {
+        generateSign : function() {
+          var appSecret = $("#appSecretID").val();
+          var argumentSet = {
+            timestamp : new Date().getTime(),
+            appKey : $("#appKeyID").val(),
+            appSecret : $("#appSecretID").val()
+          }
+          if ($("#Arg1 > input[type=\"text\"]")[0].value) {
+            argumentSet[$("#Arg1 > span.name")[0].innerHTML] = $("#Arg1 > input[type=\"text\"]")[0].value;
+          }
+          if ($("#Arg2 > input[type=\"text\"]")[0].value) {
+            argumentSet[$("#Arg2 > span.name")[0].innerHTML] = $("#Arg2 > input[type=\"text\"]")[0].value;
+          }
+          var sortedKeys = Object.keys(argumentSet).sort();
+          var midB4sign = new String("");
+          for (var i = 0; i < sortedKeys.length; i++) {
+            midB4sign += sortedKeys[i] + argumentSet[sortedKeys[i]];
+          }
+          var b4sign = appSecret + midB4sign + appSecret;
+          var sign = $.md5(b4sign);
+          argumentSet["sign"] = sign;
+          console.log(b4sign);
+          var interfaceUrl = $("#typeSelector").val() + "/"+ $("#formSelector").val()
+          $.post("api/" + interfaceUrl, argumentSet, function(data) {
+            var temptext = JSON.stringify(data);
+            console.log(temptext);
+            document.getElementById("ReturnMessages").innerHTML = temptext;
+          }, "json");
+        }
+      }
+    </script>
+  </body> 
+</html>

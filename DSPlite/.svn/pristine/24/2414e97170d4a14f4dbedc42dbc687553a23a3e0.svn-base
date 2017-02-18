@@ -1,0 +1,83 @@
+/*
+ * File Name: AppServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.List;
+
+import com.cetiti.dsp.dao.AliaseMapper;
+import com.cetiti.dsp.dao.QuantityMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.AliaseInfo;
+import com.cetiti.dsp.service.AliaseService;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+//具体的数据库增改查删操作
+ */
+
+public class AliaseServiceImpl implements AliaseService{
+
+    AliaseMapper aliaseMapper = DataSourceFactory.getMapper(AliaseMapper.class);
+	QuantityMapper quantityMapper = DataSourceFactory.getMapper(QuantityMapper.class);
+	
+	@Override
+	public List<AliaseInfo> queryAll() {
+		return aliaseMapper.selectList();
+	}
+
+	@Override
+	public void add(AliaseInfo aliaseInfo) {
+		if(null==aliaseInfo||null==aliaseInfo.getOriginalInterfaceName()){
+			return;
+		}
+		
+	}
+
+	@Override
+	public void update(AliaseInfo aliaseInfo) {
+	    //若值为空，（关键的接口名称作为标识，不可为空）跳过
+        if(null==aliaseInfo||null==aliaseInfo.getOriginalInterfaceName()){
+            return;
+        }
+        //若别名值存在，跳过
+        String original = aliaseInfo.getOriginalInterfaceName();
+        AliaseInfo info = aliaseMapper.select(original);
+        if(null==info){
+            aliaseMapper.insert(aliaseInfo);
+        }
+        else if(!info.getAliaseInterfaceName().equals(aliaseInfo.getAliaseInterfaceName())) {
+            aliaseMapper.update(aliaseInfo);
+            //开始更新包名
+            String nameSpace = toNameSpace(aliaseInfo.getOriginalInterfaceName());
+            List<AliaseInfo> list4Name = aliaseMapper.selectListByNameSpace(nameSpace);
+            for(AliaseInfo a4nS:list4Name)  
+            {  
+                String an2c = a4nS.getAliaseInterfaceName();
+                int ind = an2c.indexOf("/");
+                String fan = toNameSpace(aliaseInfo.getAliaseInterfaceName())+"/"+an2c.substring(ind+1);
+                aliaseMapper.update(new AliaseInfo(a4nS.getOriginalInterfaceName(),fan));
+            }  
+        }
+	}
+	 
+	public String toNameSpace(String apiName){
+        int ind = apiName.indexOf("/");
+        String nameSpace="";
+        if(ind>0){
+          nameSpace = apiName.substring(0, ind);
+        }
+        return nameSpace;
+	}
+
+}

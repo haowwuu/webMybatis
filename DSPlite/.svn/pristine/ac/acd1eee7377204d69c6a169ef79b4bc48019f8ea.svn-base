@@ -1,0 +1,57 @@
+/*
+ * File Name: Configration.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-11-8
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-11-8
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.util;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-11-8
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class Configration {
+	
+	private static boolean securityControlEnabled = false;
+	private static boolean quantityControlEnabled = false;
+	
+	/**
+	 * @return the securityControlEnabled
+	 */
+	public static boolean isSecurityControlEnabled() {
+		return securityControlEnabled;
+	}
+
+	/**
+	 * @return the quantityControlEnabled
+	 */
+	public static boolean isQuantityControlEnabled() {
+		return quantityControlEnabled;
+	}
+
+	
+	public static String enableSecurityControl(String[] args) {
+		if(null!=args&&args.length>0){
+			securityControlEnabled = Boolean.parseBoolean(args[0]);
+		}
+		return "securityControlEnabled: "+String.valueOf(securityControlEnabled);
+	}
+
+	public static String enableQuantityControl(String[] args) {
+		if(null!=args&&args.length>0){
+			quantityControlEnabled = Boolean.parseBoolean(args[0]);
+		}
+		return "quantityControlEnabled: "+String.valueOf(quantityControlEnabled);
+	}
+}

@@ -1,0 +1,52 @@
+package com.cetiti.dsp.model;
+
+/**
+ * 〈一句话功能简述〉
+ * 〈功能详细描述〉
+ * @author    lenovo
+ * @version   DDAP V2.0.0, 2016年12月1日
+ * @see       
+ * @since     DDAP V2.0.0
+ */
+public class AliaseInfo extends KeySecret
+{
+    public AliaseInfo(String originalInterfaceName, String aliaseInterfaceName)
+    {        
+        this.originalInterfaceName = originalInterfaceName;
+        this.aliaseInterfaceName = aliaseInterfaceName;
+    }
+    
+    public AliaseInfo(){
+        //存在有参构造函数，若没有显示定义无参构造函数，数据库返回的AliaseInfo类就会报错。
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "AliaseInfo [originalInterfaceName=" + originalInterfaceName
+            + ", aliaseInterfaceName=" + aliaseInterfaceName + "]";
+    }
+
+    private String originalInterfaceName;
+    private String aliaseInterfaceName;
+    public String getOriginalInterfaceName()
+    {
+        return originalInterfaceName;
+    }
+
+    public void setOriginalInterfaceName(String originalInterfaceName)
+    {
+        this.originalInterfaceName = originalInterfaceName;
+    }
+
+    public String getAliaseInterfaceName()
+    {
+        return aliaseInterfaceName;
+    }
+
+    public void setAliaseInterfaceName(String aliaseInterfaceName)
+    {
+        this.aliaseInterfaceName = aliaseInterfaceName;
+    }
+
+}

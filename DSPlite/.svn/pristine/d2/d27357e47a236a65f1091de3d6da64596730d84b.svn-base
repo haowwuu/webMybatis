@@ -1,0 +1,112 @@
+/*
+ * File Name: APIDetailServlet.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-8-26
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-8-26
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.servlet;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cetiti.dsp.soap.ServicePublisher;
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.model.AliaseInfo;
+import com.cetiti.dsp.service.AliaseService;
+import com.cetiti.dsp.service.impl.AliaseServiceImpl;
+import com.cetiti.dsp.util.ApiResultFormater;
+import com.cetiti.dsp.util.ApiResultFormaterFactory;
+import com.cetiti.dsp.util.SqlSessionFactoryRepos;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-8-26
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class APIDetailServlet extends HttpServlet{
+	
+	private static final long serialVersionUID = 7934699425990017164L;
+
+	@Override
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException,IOException{
+	    //用于数据库操作
+	    AliaseService aliaseService = new AliaseServiceImpl();
+        List<AliaseInfo> listAliaseInfo = aliaseService.queryAll();
+		ApiResultFormater formater = ApiResultFormaterFactory.getApiResultFormater("json");
+		String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+
+				request.getContextPath()+APIServlet.API_PATH;
+		Collection<APIinfo> apiInfos = SqlSessionFactoryRepos.getApiInfos();
+		//clone & modify apiINfos
+		Collection<APIinfo> apiInfosCopy = new HashSet<APIinfo>(apiInfos.size()); 
+		Iterator<APIinfo> iterator = apiInfos.iterator(); 
+		while(iterator.hasNext()){ 
+		    try
+            {
+		        APIinfo apIinfoClone = iterator.next().clone();
+		        String apiName = apIinfoClone.getApiName();
+	            apIinfoClone.setRestApiName(basePath+apiName);
+	            int idx = apIinfoClone.getNameSpace().lastIndexOf(".");
+	            String pakage = apIinfoClone.getNameSpace().substring(0, idx);
+	            String java = apIinfoClone.getNameSpace().substring(idx+1);
+	            apIinfoClone.setSoapApiName(ServicePublisher.getSoapHost()+pakage+"/"+java+"?wsdl");
+	            //查询数据库，修改nameSpace&selectId
+	            String bridge;
+	            String aliaseName;
+	            for(AliaseInfo aliaseInfo:listAliaseInfo){  
+	                bridge=aliaseInfo.getOriginalInterfaceName();
+	                aliaseName = aliaseInfo.getAliaseInterfaceName();
+	                if(aliaseName.trim().equals("/")){
+	                    aliaseService.update(new AliaseInfo(apIinfoClone.getApiName(),apIinfoClone.getApiName()));
+	                }else if(bridge.equals(apiName)) {
+	                  //sI4A is short for <slash index for aliaseName>
+	                    int sI4A = aliaseName.indexOf("/");
+	                    apIinfoClone.setNameSpace(aliaseName.substring(0, sI4A));
+	                    apIinfoClone.setSelectId(aliaseName.substring(sI4A+1));
+	               }      
+	            }     
+		        apiInfosCopy.add(apIinfoClone);
+            }
+            catch (CloneNotSupportedException e)
+            {
+                e.printStackTrace();
+            } 
+		}
+		
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("data", apiInfosCopy);
+        String contents = formater.format(data);
+        response.setContentType("text/hmtl;charset=utf-8");
+		//ServletOutputStream out = response.getOutputStream();
+        PrintWriter out = response.getWriter(); 
+		out.print(contents);
+		out.close();
+	}
+	
+	@Override	    
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+		    throws ServletException, IOException{
+        doGet(request, response);
+    }	
+}

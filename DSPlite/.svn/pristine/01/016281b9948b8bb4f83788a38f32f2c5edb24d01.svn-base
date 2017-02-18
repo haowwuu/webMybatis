@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	<display-name></display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+	
+	<context-param>    
+        <param-name>securityControlEnabled</param-name>    
+        <param-value>true</param-value>    
+    </context-param>
+    <context-param>    
+        <param-name>quantityControlEnabled</param-name>    
+        <param-value>true</param-value>
+    </context-param>
+
+	<listener>
+		<listener-class>com.cetiti.dsp.servlet.InitListener</listener-class>
+	</listener>
+	
+	<filter>
+		<filter-name>htmlFilter</filter-name>
+		<filter-class>com.cetiti.dsp.filter.PageFilter</filter-class>
+		<init-param>
+			<param-name>bypass-page</param-name>
+			<param-value>/include/header.html,/include/footer.html,index.html,service_accordion.html</param-value>
+		</init-param>
+		<init-param>
+			<param-name>base-path</param-name>
+			<param-value>/WEB-INF/html</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>htmlFilter</filter-name>
+		<url-pattern>*.html</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+        <filter-name>securityQuantityFilter</filter-name>
+        <filter-class>com.cetiti.dsp.filter.RestMessageFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>securityQuantityFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+	<servlet>
+		<servlet-name>APIServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.APIServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>APIServlet</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>APIContentServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.APIDetailServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>APIContentServlet</servlet-name>
+		<url-pattern>/content</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>publishServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.PublishServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>publishServlet</servlet-name>
+		<url-pattern>/publish</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>consoleServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.ConsoleServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>consoleServlet</servlet-name>
+		<url-pattern>/console</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.AppServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>/app/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>quantityServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.QuantityServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>quantityServlet</servlet-name>
+		<url-pattern>/quantity/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>statisticServlet</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.StatisticServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+        <servlet-name>statisticServlet</servlet-name>
+        <url-pattern>/statistic/*</url-pattern>
+    </servlet-mapping>
+
+	<servlet>
+		<servlet-name>SetAliase</servlet-name>
+		<servlet-class>com.cetiti.dsp.servlet.SetAliase</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>SetAliase</servlet-name>
+	    <url-pattern>/SetAliase</url-pattern>
+	</servlet-mapping>
+
+</web-app>

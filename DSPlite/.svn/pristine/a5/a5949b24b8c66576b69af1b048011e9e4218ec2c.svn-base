@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+  <head>
+    <title>service contents</title>
+	
+	<meta charset="utf-8">
+	<meta http-equiv="keywords" content="dsp,contents,service">
+	<meta http-equiv="description" content="dsp main page">
+	<meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	
+	
+    <link rel="stylesheet" type="text/css" href="resources/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/dataTables.bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="resources/css/dsp.css" />
+	
+	
+	<script type="text/javascript" src="js/jquery-1.12.3.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.js"></script>
+	<script type="text/javascript" src="js/dataTables.bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.js"></script>	
+	<script type="text/javascript" src="js/include.js"></script>
+	<script type="text/javascript" src="js/dsp.js"></script>
+  </head>
+  
+  <body>
+  
+  	<include src="include/header.html"></include>
+  	
+  	<div id="contents" class="container-fluid">
+	  	<div class="panel panel-default">
+	  		<div class="panel-body">
+		  		<form id="serviceForm" class="form-inline col-md-7" role="form">
+		  			<input type="text" name="metaDataPath" class="form-control col-md-10" style="min-width:350px;" placeholder="请输入元数据地址" data-toggle="tooltip" title="服务发布成功"/>		
+		  			<input type="Button" name="submit" class="btn btn-primary col-md-2" value="发布" />
+		  		</form>
+		  		
+		  		<div class="input-group" class="col-md-5"> 
+		            <span class="input-group-addon">搜索</span> 
+		            <input id="searchInput" type="text" class="form-control" placeholder="查询接口"> 
+		        </div> 
+	  		</div>
+		</div>
+	  	
+	    <div class="table-responsive">
+	    	<table id="serviceContentTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+	    		<thead>
+	    			<tr>
+		    			<th class="col-md-2" >REST接口</th>
+		    			<th class="col-md-2" >SOAP接口</th>
+		    			<th class="col-md-1" >参数</th>
+		    			<th class="col-md-1" >类型</th>
+		    			<th class="col-md-2" >数据源</th>
+		    			<th class="col-md-2" >数据描述文件</th>
+		    			<th class="col-md-2" >SQL语句</th>
+		    		</tr>
+	    		</thead>
+	    		<tbody>
+	    			
+	    		</tbody>
+	    	</table>
+	    </div>
+    </div>
+   
+    <div class="container">
+  		<div id="serviceAliaseModal" class="modal fade in" style="z-index:80;">
+  			<div class="modal-dialog modal-content" style="margin-top:12%; width:400px;">
+		  		<div class="modal-header" style="background-color: #428bca; padding: 10px 10px;" ></div>
+		  		<div class="modal-body container-fluid">
+		  			<form id="serviceAliaseForm" class="form-horizontal" role="form">
+			            <div class="form-group has-feedback col-sm-12 rf-no-padding">
+			            	<label for="NameSpaceAliase" class="col-sm-4 control-label">服务名称：</label>
+		                	<div class="col-sm-8 rf-no-padding">         
+		                    	<input type="text" class="form-control" name="nameSpaceAliase"  title="服务名称">
+		                	</div>    
+			            </div>
+			            <div class="form-group has-feedback col-sm-12 rf-no-padding">
+			            	<label for="InterfaceAliase" class="col-sm-4 control-label">接口名称：</label>
+		                	<div class="col-sm-8 rf-no-padding">          
+		                    	<input type="text" class="form-control" name="interfaceAliase"  title="接口名称">
+		                	</div>    
+			            </div>
+		  			</form>
+		  		</div>
+		  		<div class="modal-footer" style="padding:5px 30px;">
+		  			<button name="submit" class="btn btn-primary">保存</button>
+		  			<button class="btn btn-default" data-dismiss="modal">取消</button>
+		  		</div>
+	  		</div>
+  		</div>
+  	</div>
+  	
+	<include src="include/footer.html"></include>
+	
+    <script type="text/javascript">
+    	
+    	$(function(){
+    	    $("#serviceForm input[name='submit']").click(function(){
+    			Service.publish();
+    		});
+    		
+    		Service.reload();
+    		
+    		var table = $("#serviceContentTable").DataTable();
+	
+			// Event listener to filter input and redraw on input 
+			$("#searchInput").keyup( function() {
+				table.draw();
+			});
+    	});
+    	
+    	$.fn.dataTable.ext.search.push(
+			function( settings, data, dataIndex ) {
+				var search = $("#searchInput").val();
+				for(i in data){
+					if(data[i].indexOf(search)>=0){
+						return true;
+					}
+				}
+				return false;
+			}
+		);
+		
+    	var Service={
+    		table: $("#serviceContentTable").DataTable({
+    			"bAutoWidth": false,
+    			"ajax": "service/content",
+    			"columnDefs": [
+    				{
+    					"targets" : 4,
+						"render" : function(data, type, row) {
+							if(row){
+								var p = {apiName:row.apiName, dataSource:row.dataSource, nameSpace:row.nameSpace, selectId:row.selectId};
+								var r = JSON.stringify(p);
+								var html = "<span class='opt-td'>"+row.dataSource+"</span> <div class='opt-show'> ";
+								html += "<span onclick='Service.deleteModal("+ r + ", 0)' class='btn btn-default btn-xs'>删除接口</span>";
+								html += "<span onclick='Service.deleteModal("+ r + ", 1)' class='btn btn-default btn-xs'>删除数据源</span>";
+								html += "<span onclick='Service.aliaseModal("+ r + ")' class='btn btn-default btn-xs'>修改别名</span></div>";
+								return html;
+							}else{
+								return data;
+							}
+                    	}
+    				},
+    				{
+    					"targets" : 6,
+						"render" : function(data, type, row) {
+							if(data&&data.length>80){
+								data = "<span style='white-space: nowrap;'>"+data+"</span> ";
+							}
+							return data;
+                    	}
+    				}
+    			],
+    			"columns":[
+    				{"data":"restApiName"},
+    				{"data":"soapApiName"},
+    				{"data":"parameters"},
+    				{"data":"sqlType"},
+    				{"data":"dataSource"},
+    				{"data":"metadataFile"},
+    				{"data":"sqlText"}
+    			],
+    			"bStateSave": true,
+    			"oLanguage": {
+					"sLengthMenu": "每页显示 _MENU_ 条记录",
+				    "sZeroRecords": "对不起，查询不到任何相关数据",
+				    "sInfo": "当前显示 _START_ 到 _END_ 条，共 _TOTAL_ 条记录",
+				    "sInfoEmtpy": "找不到相关数据",
+				    "sInfoFiltered": "数据表中共为 _MAX_ 条记录)",
+				    "sProcessing": "正在加载中...",
+				    "sSearch": "搜索",
+				    "sUrl": "", 
+				    "oPaginate": {
+				    	"sFirst":    "第一页",
+				        "sPrevious": " 上一页 ",
+				        "sNext":     " 下一页 ",
+				        "sLast":     " 最后一页 "
+				     }
+				}, 
+				"aLengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+				"bInfo": false,
+				"bFilter": true,  //l-每页显示数量 f-过滤输入  t-表单Table i-信息  p-翻页 r-pRocessing
+				"sDom": '<"top"i>rt<"bottom"pl><"clear">',
+    		}),
+    		reload:function(){
+    			this.table.ajax.reload();
+	    	},
+	    	publish:function(){
+	    		var input = $("#serviceForm input[name='metaDataPath']");
+	    		var v = input.val();
+	    		$.post("service/publish", {metaDataPath:v}, function(data){
+	    			if(data.resultcode==0){
+	    				input.tooltip('show');
+	    				Service.reload();
+	    			}else{
+	    				input.tooltip('destroy');
+				        input.attr('title', "服务发布失败, message:"+data.message);
+				        input.tooltip('show');
+	    			}
+	    		}, "json")
+	    	},
+	    	deleteModal:function(row, type){
+	    		var data, action;
+	    		if(type===0){
+	    			data = row.apiName;
+	    			action = "Service.deleteApi("+'"' + data + '"'+")";
+	    		}else if(type===1){
+	    			data = row.dataSource;
+	    			action = "Service.deleteRepos("+'"' + data + '"'+")";
+	    		}
+	    		if(action){
+	    			$("#confirmModal .confirm-content").html(data);
+		    		$("#confirmModal button[name='submit']").attr("onclick", action);
+		    		$("#confirmModal").modal('show');
+	    		}
+	    	},
+	    	aliaseModal:function(row){
+	    		$("#serviceAliaseForm input").val('');
+	    		$("#serviceAliaseForm input[name='interfaceAliase']").attr("placeholder", row.selectId);
+	    		$("#serviceAliaseForm input[name='nameSpaceAliase']").attr("placeholder", row.nameSpace);
+	    		$("#serviceAliaseModal button[name='submit']").attr("onclick", "Service.aliase("+'"' + row.apiName + '"'+");");
+	    		$("#serviceAliaseModal").modal('show');
+	    	},
+	    	aliase:function(api){
+	    		var aliaseData = {
+	    			interfaceOriginal:api,
+	    		    interfaceAliase:$("#serviceAliaseForm input[name='interfaceAliase']").val(),
+	    		    nameSpaceOriginal:api.substring(0,api.indexOf("/")),
+	    		    nameSpaceAliase: $("#serviceAliaseForm input[name='nameSpaceAliase']").val()
+	    		};
+	    		$.ajax({
+                    type:"post",
+                    url:"service/setAliase",
+                    data:aliaseData,
+                    success:function(data){
+                    	$("#serviceAliaseModal").modal('hide');
+                    }
+                });
+	    	},
+	    	deleteApi:function(api){
+	    		if(!api){
+	    			return;
+	    		}
+	    		api = api.replace("/", ",");
+	    	    var p = "deleteService-"+api;
+	    		$.ajax({
+	    			type:"post",
+	    			url:"console",
+	    			data:{instruction:p},
+	    			success:function(data){
+	    				$("#confirmModal").modal('hide');
+	    				Service.reload();
+	    			}
+	    		});
+	    	},
+	    	deleteRepos:function(ds){
+	    		if(!ds){
+	    			return;
+	    		}
+	    	    var p = "clearRepos-"+ds;
+	    		$.ajax({
+	    			type:"post",
+	    			url:"console",
+	    			data:{instruction:p},
+	    			success:function(data){
+	    				$("#confirmModal").modal('hide');
+	    				Service.reload();
+	    			}
+	    		});
+	    	}
+    	}
+    </script>
+    
+  </body>
+</html>

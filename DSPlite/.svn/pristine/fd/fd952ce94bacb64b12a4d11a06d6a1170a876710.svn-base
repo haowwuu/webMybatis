@@ -1,0 +1,89 @@
+/*
+ * File Name: ServicePublisher.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-9
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-9
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetit.dsp.soap;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import javax.xml.ws.Endpoint;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetit.dsp.soap.compiler.JavaStringCompiler;
+import com.cetiti.dsp.model.APIinfo;
+import com.cetiti.dsp.util.IpPortUtil;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   WSERP V1.0.0, 2016-10-9
+ * @see       
+ * @since     WSERP V1.0.0
+ */
+
+public class ServicePublisher {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServicePublisher.class);
+	
+	private static Set<Endpoint> endpointSet = new HashSet<Endpoint>();
+	
+	private static String SOAP_HOST;
+	static{
+		if(null==SOAP_HOST){
+			Integer port = IpPortUtil.getAvailableEndpointPort(8081);
+			if(null==port){
+				throw new RuntimeException("no soap port available");
+			}
+			
+			SOAP_HOST = "http://"+IpPortUtil.SERVER_IP+":"+port+"/";
+		}
+	}
+	
+	public static String getSoapHost(){
+		return SOAP_HOST;
+	}
+	
+	public static void publish(Collection<APIinfo> apiInfos){
+		stop();
+		JavaStringCompiler compiler = new JavaStringCompiler();
+		Map<String, String> source = CodeGenerator.generateSource(apiInfos);
+		try {	
+			for(Entry<String, String> entry:source.entrySet()){
+				int idx = entry.getKey().lastIndexOf(".");
+				String pakage = entry.getKey().substring(0, idx);
+				String java = entry.getKey().substring(idx+1);
+				Map<String, byte[]> results = compiler.compile(java+".java", entry.getValue());
+				//System.out.println(entry.getValue());
+			
+				Class<?> clazz = compiler.loadClass(entry.getKey(), results);
+				Object obj = clazz.newInstance();
+				endpointSet.add(Endpoint.publish(SOAP_HOST+pakage+"/"+java, obj));
+			}	
+		} catch (Exception e) {
+			LOGGER.error("publish soap webservice exception! "+e.getMessage());
+		}
+	}
+	
+	public static void stop(){
+		for(Endpoint endpoint: endpointSet){
+			endpoint.stop();
+		}
+		endpointSet.clear();
+	}
+	
+}

@@ -1,0 +1,72 @@
+/*
+ * File Name: QuantityServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-11-2
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-11-2
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.List;
+
+import com.cetiti.dsp.dao.QuantityMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.QuantityInfo;
+import com.cetiti.dsp.service.QuantityService;
+import com.cetiti.dsp.util.SequenceGenerator;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-11-2
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class QuantityServiceImpl implements QuantityService{
+
+	private QuantityMapper quantityMapper = DataSourceFactory.getMapper(QuantityMapper.class);
+	
+	@Override
+	public List<QuantityInfo> queryAll() {
+		return quantityMapper.selectList();
+	}
+
+	@Override
+	public void add(QuantityInfo quantity) {
+		if(null==quantity||null==quantity.getAppKey()||null==quantity.getApiMethod()){
+			return;
+		}
+		QuantityInfo info = quantityMapper.selectByKeyAndMethod(quantity.getAppKey(), quantity.getApiMethod());
+		if(null!=info){
+			info.setTotal(quantity.getTotal());
+			quantityMapper.update(info);
+			return;
+		}
+		quantity.setQuantityId(SequenceGenerator.next());
+		quantityMapper.insert(quantity);
+	}
+
+	@Override
+	public void update(QuantityInfo quantity) {
+		if(null==quantity||null==quantity.getAppKey()||null==quantity.getApiMethod()){
+			return;
+		}
+		quantityMapper.update(quantity);
+	}
+
+	@Override
+	public void delete(String quantityId) {
+		if(null==quantityId){
+			return;
+		}
+		quantityMapper.delete(quantityId);
+	}
+
+}

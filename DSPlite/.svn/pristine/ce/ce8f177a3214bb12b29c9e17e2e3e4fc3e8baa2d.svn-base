@@ -1,0 +1,154 @@
+@charset "utf-8";
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+#hero-slider {
+	text-align: left;
+	background-color: #F8F8F8;
+	border: 1px solid #ccc;
+	width: 992px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	margin: 0 auto;
+	font-family: arial;
+	*position:relative;
+    *left:0;
+    *top:0;
+}
+
+#hero-slider .mask {
+	border-left: 3px solid #dedede;
+	padding: 5px 5px;
+	background-color: #F8F8F6;
+	float: right;
+	width: 710px;
+	height: 660px;
+	margin: 15px 15px 15px 15px;
+	overflow:auto;
+	
+}
+
+#hero-slider .mask p {
+	font-weight: bold;
+	padding: 10px 20px;
+	margin: 10px 20px;
+}
+
+#hero-slider .mask h2 {
+	text-align: center;
+	font-size: 32px;
+	padding: 15px 25px;
+	text-shadow: 0 0 1px #999;
+	font-weight: bold;
+	border-bottom: 1px solid #F8F8F8;
+	border-bottom-style: outset;
+}
+
+#hero-slider .mask pre {
+	width: 500px;
+}
+
+#hero-slider .mask p1 {
+	font: 12px "MicroSoft YaHei", "Courier New", "Andale Mono", monospace;
+	padding: 10px 20px;
+	border: 1px solid #ccc;
+	color: #333;
+	background-color: #F8F8F8;
+	line-height: 20px;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+	border-radius: 3px;
+	margin: 20px 40px;
+}
+
+#hero-slider .panel {
+	width: 715px;
+	height: 300px;
+	float: center;
+}
+
+#hero-slider ul {
+	padding: 5px 5px 0 5px;
+	list-style: none;
+	width: 250px;
+/* 	float: left; */
+	margin-bottom: 1px;
+	/* 	border-right: 1px solid #dedede; */
+	/*     height: 570px; */
+}
+
+#tabLeft>ul>h4>a {
+	font-weight: bold;
+/* 	float: left; */
+	width: 250px;
+	font-size: 18px;
+	overflow:hidden
+/* 	margin-right: -1px; */
+}
+
+.panel-collapse a{
+    display: block;
+    margin: 5px 0;
+    font-size: 15px;
+    font-weight: bold;
+    color: #88b5dd;
+    height: 20px;
+    line-height: 22px;
+    text-decoration: none;
+    padding: 0px 0px 0px 2px;
+}
+
+#tabLeft>ul>h4>a:hover,
+#tabLeft>ul>h4>a.current {
+    color: #fff;
+    background: #0088bb;
+}
+
+
+#hero-slider ul li {
+	width: 208px;
+	padding: 0px 0px 0px 12px;
+	color: #428bca;
+	background-color: #F8F8F8;
+}
+
+#hero-slider ul li  .active {
+	background-color: #bebebe;
+	width: 180px;
+}
+
+.panel h2 {
+	padding: 15px 0 0 0;
+	color: #0058a9;
+}
+
+.panel p {
+	color: #666;
+}
+
+.clear {
+	clear: both
+}
+
+.collapsed .portal_arrow {
+    border-top-color:transparent;
+    border-left-color: #aaa;
+}
+
+
+.portal_arrow {
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    border-top-color: #aaa;
+    border-left-color: transparent;
+    display: inline-block;
+    margin-left: -12px;
+    font-size: 1px;
+    line-height: 0;
+}
+
+

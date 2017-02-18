@@ -1,0 +1,106 @@
+/*
+ * File Name: AppServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-31
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-31
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.cetiti.dsp.dao.AliaseMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.KeyValue;
+import com.cetiti.dsp.service.AliaseService;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+//具体的数据库增改查删操作
+ */
+
+public class AliaseServiceImpl implements AliaseService{
+
+    AliaseMapper aliaseMapper = DataSourceFactory.getMapper(AliaseMapper.class);
+    private static Map<String, String> aliasRepos = new ConcurrentHashMap<String, String>();
+
+	public AliaseServiceImpl()
+    {
+		if(aliasRepos.size()<1){
+			for(KeyValue<String, String> kv:aliaseMapper.selectList()){
+	            aliasRepos.put(kv.getKey(), kv.getValue());
+	        }
+		}
+    }
+	
+	@Override
+    public String getAlias(String serviceName){
+	      return aliasRepos.get(serviceName);
+    }
+
+	
+    @Override
+	public List<KeyValue<String, String>> queryAll() {
+		return aliaseMapper.selectList();
+	}
+
+/*	@Override
+	public void add(KeyValue<String, String> aliaseInfo) {
+		if(null==aliaseInfo||null==aliaseInfo.getKey()){
+			return;
+		}
+		aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+		aliaseMapper.insert(aliaseInfo);
+	}*/
+
+	@Override
+    public int modify(KeyValue<String, String> aliaseInfo) {
+        if(null==aliaseInfo||null==aliaseInfo.getKey()||aliaseInfo.getValue().trim().equals("")){
+            return 0;
+        }
+        int id4a = aliaseInfo.getKey().indexOf("/");
+        for(Map.Entry<String, String> entry:aliasRepos.entrySet()){
+            int idx = entry.getKey().indexOf("/");
+            if((idx<0)&&(id4a<0)){//不同包的别名不可相同
+                if((!entry.getKey().equals(aliaseInfo.getKey()))
+                    &&(entry.getValue().equals(aliaseInfo.getValue()))){
+                    return 1;
+                }
+            }else if((idx>0)&&(id4a>0)){//同一包下，接口名不可相同
+                if((entry.getKey().substring(0,idx)).equals(aliaseInfo.getKey().substring(0,aliaseInfo.getKey().indexOf("/")))&&
+                    (entry.getValue().equals(aliaseInfo.getValue()))){
+                    return 2;
+                }                
+            }  
+        }        
+        if(getAlias(aliaseInfo.getKey())==null){
+            aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+            aliaseMapper.insert(aliaseInfo);
+            return 3;
+        }else if(!getAlias(aliaseInfo.getKey()).equals(aliaseInfo.getValue())){
+            aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+            aliaseMapper.update(aliaseInfo); 
+            return 4;
+        }
+        return 5;
+    } 
+
+/*	@Override
+	public void update(KeyValue<String, String> aliaseInfo) {
+	    //若值为空，（关键的接口名称作为标识，不可为空）跳过
+        if(null==aliaseInfo||null==aliaseInfo.getKey()){
+            return;
+        }
+        aliasRepos.put(aliaseInfo.getKey(), aliaseInfo.getValue());
+        aliaseMapper.update(aliaseInfo); 
+	}*/
+}

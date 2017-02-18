@@ -1,0 +1,121 @@
+/*
+ * File Name: SecurityQuantityServiceImpl.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-24
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-24
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.service.impl;
+
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cetiti.dsp.dao.AppMapper;
+import com.cetiti.dsp.dao.QuantityMapper;
+import com.cetiti.dsp.ds.DataSourceFactory;
+import com.cetiti.dsp.model.APPinfo;
+import com.cetiti.dsp.model.QuantityInfo;
+import com.cetiti.dsp.service.SecurityQuantityService;
+import com.cetiti.dsp.util.ApiRequestRepos;
+import com.cetiti.dsp.util.ApiResult;
+import com.cetiti.dsp.util.EncryptUtil;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-24
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class SecurityQuantityServiceImpl implements SecurityQuantityService{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(SecurityQuantityServiceImpl.class);
+	private AppMapper appMapper = DataSourceFactory.getMapper(AppMapper.class);
+	private QuantityMapper quantityMapper = DataSourceFactory.getMapper(QuantityMapper.class);
+	private static String[] noneNullParam = {APP_KEY, TIMESTAMP, SIGN};
+	
+	@Override
+	public ApiResult securityCheck(Map<String, String> paramMap) {
+		ApiResult retnNo  = ApiResult.getDefaultFailResult();
+		if(null==paramMap){
+			retnNo.setMsg("appKey null");
+			return retnNo;
+		}
+		
+		for(String p:noneNullParam){
+			if(null==paramMap.get(p)){
+				retnNo.setMsg(p+" null");
+				return retnNo;
+			}
+		}
+		
+		if(!ApiRequestRepos.isValidReq(paramMap.get(APP_KEY), paramMap.get(TIMESTAMP))){
+			retnNo.setMsg("request expired");
+			return retnNo;
+		}
+		
+		APPinfo app = appMapper.select(paramMap.get(APP_KEY));
+		if(null==app){
+			retnNo.setMsg("appKey do not exist");
+			return retnNo;
+		}
+		String secret = app.getAppSecret();
+        StringBuilder sb = new StringBuilder();
+        sb.append(secret);
+        Map<String, String> treeMap = new TreeMap<String, String>(paramMap);
+        for(Entry<String, String>entry:treeMap.entrySet())
+        {
+            if(null!=entry.getValue()&&!SIGN.equals(entry.getKey()))
+            {
+                sb.append(entry.getKey()).append(entry.getValue().trim());
+            }
+        }
+        sb.append(secret);
+        String serverSign = EncryptUtil.md5(sb.toString());
+        String sign = paramMap.get(SIGN);
+        if(!serverSign.equalsIgnoreCase(sign)){
+        	LOGGER.warn("sign error, param[{}], serverSign[{}]", sb.toString(), serverSign);
+        	retnNo.setMsg("sign error");
+        	return retnNo;
+        }
+        
+		return ApiResult.getDefaultActionResult();
+	}
+
+	
+	@Override
+	public ApiResult quantityCheck(String appKey, String apiName) {
+
+		ApiResult retnNo  = ApiResult.getDefaultFailResult();
+		if(null==appKey){
+			retnNo.setMsg("appKey null");
+			return retnNo;
+		}
+		if(null==apiName){
+			retnNo.setMsg("apiName null");
+			return retnNo;
+		}
+		System.out.println(apiName);
+		QuantityInfo quantity = quantityMapper.selectByKeyAndMethod(appKey, apiName);
+		if(null!=quantity&&quantity.getUsed()<quantity.getTotal()){
+			quantity.setUsed(quantity.getUsed()+1);
+			quantityMapper.update(quantity);
+			return ApiResult.getDefaultActionResult();
+		}else{
+			retnNo.setMsg("quantity null");
+			return retnNo;
+		}
+	}
+
+}

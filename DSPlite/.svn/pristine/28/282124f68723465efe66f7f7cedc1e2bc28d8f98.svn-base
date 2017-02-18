@@ -1,0 +1,27 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+
+<style type="text/css">
+footer{
+    color: #eee;
+    padding-top:60px;
+}
+
+footer .text-center{
+	padding-top:5px;
+	padding-top:5px;
+}
+
+.half-height{
+    min-height: 30px;
+}
+</style>
+
+<footer>
+	<nav class="navbar navbar-inverse navbar-fixed-bottom half-height">
+	    <div class="navbar-inner navbar-content-center">
+	        <div class="text-center">
+				© <span>2016</span> <a href="http://www.cethik.com/">中电海康集团有限公司</a>, Inc. All Rights Reserved.
+			</div>
+	    </div>
+	</nav>
+</footer>

@@ -1,0 +1,12 @@
+DROP TABLE service_resource; 
+DROP TABLE key_secret;
+
+CREATE TABLE service_resource (
+	resource_url VARCHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE key_secret (
+	app_key VARCHAR(50) PRIMARY KEY,
+	app_secret VARCHAR(50) NOT NULL,
+	app_address VARCHAR(100)
+);           

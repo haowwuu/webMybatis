@@ -1,0 +1,112 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>statistic</title>
+    
+	<meta http-equiv="keywords" content="dsp,statistic,service">
+	<meta http-equiv="description" content="dsp main page">
+	<meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	
+	
+    <link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dataTables.bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/dsp.css" />
+	<%-- <link rel="stylesheet" type="text/css" href="<%=basePath%>resources/css/examples.css" /> --%>
+	
+	<script type="text/javascript" src="<%=basePath%>js/jquery-1.12.3.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/bootstrap.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/dataTables.bootstrap.min.js"></script>	
+	<script type="text/javascript" src="<%=basePath%>js/jquery.flot.js"></script>
+	<script type="text/javascript" src="<%=basePath%>js/jquery.flot.time.js"></script>
+  </head>
+  
+  <body>
+  	<jsp:directive.include file="include/header.jsp" />
+
+	<div id="content" class="container-fluid">
+		<div class="plot-header">
+			<h3>服务统计</h3>
+			<p>最近一小时内被调用次数最多的接口（前10）</p>
+		</div>
+		<div class="plot-container">
+			<div id="apiStatistic" class="plot-placeholder"></div>
+		</div>
+		
+		<div class="plot-header">
+			<h3>用户统计</h3>
+			<p>最近一小时内调用接口次数最多的用户（前10）</p>
+		</div>
+		<div class="plot-container">
+			<div id="keyStatistic" class="plot-placeholder"></div>
+		</div>
+			
+	</div>
+
+	<jsp:directive.include file="include/footer.jsp" />
+	
+    <script type="text/javascript">
+    	$(function() {
+    		$("#navItem li[name='stat']").addClass('active'); 
+    		statistic.start();
+			setInterval(statistic.start, 7000);
+		});
+		
+		var statistic={
+			start:function(){
+				statistic.statByApi();
+				statistic.statByKey();
+			},
+			statByApi:function(){
+				$.ajax({
+	    			type:"post",
+	    			url:"statistic/statisticByApi",
+	    			dataType:"json",
+	    			//data:v,
+	    			success:function(data){
+	    				var v = [];
+	    				for(var e in data){
+	    					var a = data[e];
+	    					var p = {data:[], label:'', points:{show:true}};
+	    					p.data = data[e];
+	    					p.label = e;
+	    					v.push(p);
+	    					//$.plot("#apiStatistic", [{data:a, points:{show:true}}]);
+	    				}
+	    				$.plot("#apiStatistic", v, {xaxes: [ { mode: "time",  timezone: "browser"} ]});
+	    			}	
+	    		});
+			},
+			statByKey:function(){
+				$.ajax({
+	    			type:"post",
+	    			url:"statistic/statisticByKey",
+	    			dataType:"json",
+	    			//data:v,
+	    			success:function(data){
+	    				var v = [];
+	    				for(var e in data){
+	    					var a = data[e];
+	    					var p = {data:[], label:'', points:{show:true}};
+	    					p.data = data[e];
+	    					p.label = e;
+	    					v.push(p);
+	    				}
+	    				$.plot("#keyStatistic", v, {xaxes: [ { mode: "time",  timezone: "browser"} ]});
+	    			}	
+	    		});
+			}
+		}
+    </script>
+  </body>
+</html>

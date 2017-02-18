@@ -1,0 +1,86 @@
+/*
+ * File Name: AppMapperTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-21
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-21
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.dao;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.cetiti.dsp.ds.DataSourceFactory;
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-21
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class AppMapperTest {
+
+	/**
+	 * 〈一句话功能简述〉
+	 * 
+	 * @throws java.lang.Exception
+	 */
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	/**
+	 * Test method for {@link com.cetiti.dsp.dao.AppMapper#selectList()}.
+	 */
+	@Test
+	public void testSelectList() {
+		DataSourceFactory.createSchemaAndLoadData();
+		long t = System.nanoTime();
+		System.out.println(t);
+		System.out.println(String.valueOf(t).length());
+	}
+
+	/**
+	 * Test method for {@link com.cetiti.dsp.dao.AppMapper#selectMap()}.
+	 */
+	@Ignore
+	public void testSelectMap() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.cetiti.dsp.dao.AppMapper#select(java.lang.String)}.
+	 */
+	@Ignore
+	public void testSelect() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.cetiti.dsp.dao.AppMapper#insert(com.cetiti.dsp.model.APPinfo)}.
+	 */
+	@Ignore
+	public void testInsert() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.cetiti.dsp.dao.AppMapper#update(com.cetiti.dsp.model.APPinfo)}.
+	 */
+	@Ignore
+	public void testUpdate() {
+		fail("Not yet implemented");
+	}
+
+}

@@ -1,0 +1,109 @@
+/*
+ * File Name: RestMessageFilterTest.java
+ * Copyright: Copyright 2014-2014 CETC52 CETITI All Rights Reserved.
+ * Description: 
+ * Author: Wuwuhao
+ * Create Date: 2016-10-28
+
+ * Modifier: Wuwuhao
+ * Modify Date: 2016-10-28
+ * Bugzilla Id: 
+ * Modify Content: 
+ */
+package com.cetiti.dsp.filter;
+
+import static org.junit.Assert.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+import com.cetiti.dsp.util.EncryptUtil;
+
+
+/**
+ * 〈一句话功能简述〉
+ * 
+ * @author    Wuwuhao
+ * @version   DSPlite V0.2.0, 2016-10-28
+ * @see       
+ * @since     DSPlite V0.2.0
+ */
+
+public class RestMessageFilterTest {
+
+	static String appKey = "90bd63ca4859ce7d4c851c2923c4aaeb";
+	static String appSecret = "889d4e34ca7b66f4f5d71b1662d249a2";
+	
+	private String baseUrl = "http://localhost:8080/DSPlite/api/";
+	
+	static Map<String, String> setSignature(Map<String, String> map){
+		if (null == map) {
+			map = new HashMap<String, String>();
+		}
+		map.put("appKey", appKey);
+		map.put("timestamp", String.valueOf(System.currentTimeMillis()));
+		
+		Map<String, String> sortedParams = new TreeMap<String, String>(map);
+		Set<Entry<String, String>> entrys = sortedParams.entrySet();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(appSecret);
+		for (Entry<String, String> param : entrys) {
+			if (param.getValue() != null) {
+				sb.append(param.getKey()).append(param.getValue().trim());
+			}
+		}
+		sb.append(appSecret);
+		String sign = EncryptUtil.md5(sb.toString());
+		//System.out.println("clientSign:" + sign + "  sb:" + sb.toString());
+		map.put("sign", sign);
+
+		return map;
+	}
+	
+	static boolean isSuccess(String result){
+		if(null==result){
+			return false;
+		}
+		
+		return result.indexOf("\"resultcode\":\"0\"")>=0;
+	}
+	
+	@Test
+	public void testSelectStrategys() throws Exception {
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectStrategys";
+		String retn = HttpUtil.doPost(url, setSignature(null));
+		
+		assertTrue(isSuccess(retn));
+	}
+	
+	@Test
+	public void testSelectLevelsWithParams() throws Exception{
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectLevelsWithParams";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("levelid", "3");
+		paramMap.put("levelname", "level5");
+		String retn = HttpUtil.doPost(url, setSignature(paramMap));
+		
+		assertTrue(isSuccess(retn));
+	}
+	
+	@Test
+	public void testSelectTableWithDsql() throws Exception{
+		String url = baseUrl + "com.cetiti.dsp.Mapper/selectTableWithDsql";
+		Map<String, String> paramMap = new HashMap<String, String>();
+		paramMap.put("sql", "t_dsp_errorcode where errorid<3");
+		String retn = HttpUtil.doPost(url, setSignature(paramMap));
+		
+		//System.out.println(retn);
+		assertTrue(isSuccess(retn));
+	}
+
+}
